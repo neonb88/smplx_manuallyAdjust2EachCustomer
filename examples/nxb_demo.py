@@ -29,7 +29,32 @@ from copy import deepcopy # Aug 14, 2020
 #==============================================
 
 #==================================================
-def resizeLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches):    # we don't have this customerEstimatedTibiaLenInches, 
+def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches):    # we don't have this customerEstimatedTibiaLenInches, 
+  # TODO:  find the EXACT RIGHT VERTEX  in SMPL-X that will let us scale the tibia correctly
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  # TODO    TODO TODO TODO TODO
+  # NOTE NOTE NOTE NOTE NOTE
+  # NOTE NOTE NOTE NOTE NOTE
+  # NOTE NOTE NOTE NOTE NOTE
+  # NOTE: NOTE: NOTE: NOTE: NOTE:  slight assumption that causes a problem:  I can't really scale  the tibia directly to yHeight==1, because the SMPL-X tibia we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  # NOTE NOTE NOTE NOTE NOTE
+  # NOTE NOTE NOTE NOTE NOTE
+  # NOTE NOTE NOTE NOTE NOTE
+  # TODO TODO  TODO TODO TODO
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  X,Y,Z=0,1,2
+
   leftTibiaIdxes = leftTibiaIndices(vertices)
   print(" "* 9)
   print("="*99)
@@ -39,7 +64,48 @@ def resizeLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEst
   print(leftTibiaIdxes.shape)
   print("="*99)
   print(" "* 9)
-  #leftTibiaVerts = deepcopy(vertices[:, leftTibiaIdxes] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
+  leftTibiaVerts = deepcopy(vertices[leftTibiaIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
+
+  # Center:
+  #   (newTibiaCentroid = (0,0,0)  )
+  origTibiaCentroid = leftTibiaVerts.mean(axis=0)  # DOWN=0
+  #====================================================================================
+  # TODO: rename all these hellishly-long-variable names to simply "leftTibiaVerts"  
+  #====================================================================================
+  leftTibiaVertsCenteredOnOrigin = leftTibiaVerts - origTibiaCentroid
+
+  # Scale down:
+  #   Normalize tibiaLen to 1:
+  #     NOTE:  (tibiaLen is ALMOST exactly "`Y`," but not **__QUITE__**)
+  #     NOTE: maintains proportions of tibia;   **doesn't lose information**    -nxb; August 14, 2020
+  currHeightY = leftTibiaVertsCenteredOnOrigin[:,Y].max() - leftTibiaVertsCenteredOnOrigin[:,Y].min()
+  leftTibiaVertsCenteredOnOrigin /= currHeightY
+  #====================================================================================================================
+  # NOTE
+  # NOTE
+  # NOTE:  slight assumption that causes a problem:  I can't really scale  the tibia directly to yHeight==1, because the SMPL-X tibia we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
+  # NOTE
+  # NOTE
+  #====================================================================================================================
+  #   In code, "T-Pose" translates to      ("` theta==np.zeros( 127*3 )`")
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+
+  # Scale up again:
+  leftTibiaVertsCenteredOnOrigin *=customerEstimatedTibiaLenInches
+  #leftTibiaVertsCenteredOnOriginScaledToRealTibiaLenInches = leftTibiaVertsCenteredOnOriginNormalizedTo1 * customerEstimatedTibiaLenInches
+  #leftTibiaVertsCenteredOnOrigin *= customerEstimatedTibiaLenInches
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+
+  # Translate:
+  #   Translate back to original centroid: 
+  #     (where the rest of the SMPL-X body STILL is)
+  finalResizedLeftTibiaVerts = leftTibiaVertsCenteredOnOrigin + origTibiaCentroid
+
+  return finalResizedLeftTibiaVerts, leftTibiaIdxes
+
+
+
+
   resizedVerts = deepcopy(vertices)
   print(" "* 9)
   print("="*99)
@@ -88,8 +154,8 @@ def leftTibiaIndices(vs):
   tibiasVertsIdxs     = np.intersect1d(  aboveAnkleIdxs,  belowKneeIdxs) 
   leftTibiasVertsIdxs = np.intersect1d(  tibiasVertsIdxs, leftSideOFBodyIdxs) 
   return leftTibiasVertsIdxs
-  leftTibia           = vs[leftTibiasVertsIdxs, :]
-  return leftTibia
+  #leftTibia           = vs[leftTibiasVertsIdxs, :]
+  #return leftTibia
 
 
 #==================================================
@@ -171,7 +237,9 @@ def main(model_folder, model_type='smplx', ext='npz',
     #    -nxb;   on August 14, 2020      (more technically, 8:19 P.M. EDT    on August 14, 2020)
 
     #  Major Line:              (" ` resizeLeftSMPLX_Tibia(...) ` "  contains a LOT of code)
-    vertsWithReshapedLeftTibia= resizeLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
+    reshapedLeftTibiaVerts, leftTibiaIdxes = getResizedLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
+    vertsWithReshapedLeftTibia = deepcopy(vertices)
+    vertsWithReshapedLeftTibia[leftTibiaIdxes] = reshapedLeftTibiaVerts
  
     '''
       maxesAndMins:             NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020

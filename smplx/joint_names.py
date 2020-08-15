@@ -23,6 +23,7 @@ JOINT_NAMES = [
     'left_knee',                             #  5               
     'right_knee',                            #  6                
     'spine2',                                #  7            
+    
     'left_ankle',                            #  8                
     'right_ankle',                           #  9                 
     'spine3',                                #  10           

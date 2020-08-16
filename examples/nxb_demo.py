@@ -1,3 +1,12 @@
+'''
+{'xMax': 0.8656285,
+ 'xMin': -0.8656085,
+ 'yMax': 0.4348336,
+ 'yMin': -1.3589503,
+ 'zMax': 0.15359592,
+ 'zMin': -0.1527159}
+'''
+
 # -*- coding: utf-8 -*-
 
 # Max-Planck-Gesellschaft zur Förderung der Wissenschaften e.V. (MPG) is
@@ -28,8 +37,68 @@ import datetime # added by nxb, August 13, 2020
 from copy import deepcopy # Aug 14, 2020
 #==============================================
 
+
+
+
 #==================================================
-def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches):    # we don't have this customerEstimatedTibiaLenInches, 
+def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, customerEstimatedHeightInches):    # we don't have this customerEstimatedThighLenInches, 
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  return
+  
+  '''
+    Do a lot of shit here   [insertCode]
+
+      (Coding all this shit might take 
+        ~4 hours, give-or-take-a-few-minutes) based on the 
+        "experiential data" for the other similar function   
+        "getResizedLeftSMPLX_Tibia()"
+  '''
+  #   and then
+  # FINALLY:
+  #   (something like this return statement)
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  # TODO
+  return finalResizedLeftThighVerts, leftThighIdxes
+#==================================================
+
+
+
+
+
+#==================================================
+def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, currBodyPartsXStretchingSlashScaling, currBodyPartsZStretchingSlashScaling):    # we don't have this customerEstimatedTibiaLenInches, 
+  # TODO: fill in the (numerous) details.  -nxb;   August 15;  9:50 P.M. EDT
+  raise Exception( "fucking finish your code, Bendich.")
+
+  # Idea:   have this spit out all the body parts with centroids at (0,0,0) ?    Then it's a different function's job to "put Humpty-Dumpty back together again"      -NXB, August 15, 2020
+
+  # NOTE:    generalize this to be "getResizedLeftSMPLX_BodyPartNameHere(..., otherParams, ...)"  ?
+  #   -nxb, August 15, 2020
+  '''
+    This function can be generalized to each body part?
+    Code reuse would prevent some headaches, make it so changing error-catching in just the general function would fix the error(s) for all the body parts rather than just the one, 
+
+    August 15, 2020
+  '''
+
+
   # TODO:  find the EXACT RIGHT VERTEX  in SMPL-X that will let us scale the tibia correctly
   #===================================================================================================
   #===================================================================================================
@@ -53,6 +122,12 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   #===================================================================================================
   #===================================================================================================
   #===================================================================================================
+
+    #===================================================================================================
+    #   As of August 15, at 8:31 P.M.  EDT,   the function header was entitled:
+    #===================================================================================================
+    # function header " getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches): "
+    #===================================================================================================
   X,Y,Z=0,1,2
 
   leftTibiaIdxes = leftTibiaIndices(vertices)
@@ -82,9 +157,7 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   leftTibiaVertsCenteredOnOrigin /= currHeightY
   #====================================================================================================================
   # NOTE
-  # NOTE
   # NOTE:  slight assumption that causes a problem:  I can't really scale  the tibia directly to yHeight==1, because the SMPL-X tibia we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
-  # NOTE
   # NOTE
   #====================================================================================================================
   #   In code, "T-Pose" translates to      ("` theta==np.zeros( 127*3 )`")
@@ -104,8 +177,7 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   return finalResizedLeftTibiaVerts, leftTibiaIdxes
 
 
-
-
+  '''     old ending to this func:    -nxb,     August 15,    at 8:50 P.M. EDT.   
   resizedVerts = deepcopy(vertices)
   print(" "* 9)
   print("="*99)
@@ -117,6 +189,7 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   #vertices[:, leftTibiaIdxes] *= 2 # this line should do some weird geometry to the SMPL-X model's left tibia    -nxb, August 14, 2020
   return resizedVerts
   raise Exception( "fucking finish your code, Bendich.")
+  '''
 #==================================================
 
 #==================================================
@@ -236,27 +309,21 @@ def main(model_folder, model_type='smplx', ext='npz',
     # """
     #    -nxb;   on August 14, 2020      (more technically, 8:19 P.M. EDT    on August 14, 2020)
 
+    #================================================================================
+    #================================================================================
+    #================================================================================
     #  Major Line:              (" ` resizeLeftSMPLX_Tibia(...) ` "  contains a LOT of code)
+    #================================================================================
+    #================================================================================
+    #================================================================================
     reshapedLeftTibiaVerts, leftTibiaIdxes = getResizedLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
     vertsWithReshapedLeftTibia = deepcopy(vertices)
     vertsWithReshapedLeftTibia[leftTibiaIdxes] = reshapedLeftTibiaVerts
- 
-    '''
-      maxesAndMins:             NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
-        {'xMax': 0.8656285,
-         'xMin': -0.8656085,
-         'yMax': 0.43483356,
-         'yMin': -1.3589503,
-         'zMax': 0.15359592,
-         'zMin': -0.1527159}
-    '''
-    joints = output.joints.detach().cpu().numpy().squeeze()
 
-    #print('betas =', betas)              # betas = tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])
-    #print('betas.shape =', betas.shape)  # torch.Size([1,10])
-    print('Vertices.shape =', vertices.shape) # (10475,3)
-    print('Vertices type =', type(vertices)  ) # "numpy.ndarray" ;   
-    
+    reshapedLeftThighVerts, leftThighIdxes = getResizedLeftSMPLX_Thigh(vertices, TIM_THIGH_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
+    vertsWithReshapedLeftThigh = deepcopy(vertices)
+    vertsWithReshapedLeftThigh[leftThighIdxes] = reshapedLeftThighVerts
+ 
     '''
       maxesAndMins:             NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
         {'xMax': 0.8656285,
@@ -274,10 +341,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     print('Vertices type =', type(vertices)  ) # "numpy.ndarray" ;   I'm like 90% sure)    
     timestamp= datetime.datetime.now().strftime('%Y_%m_%d____%H:%M_%p__')
 
-    #================================================================================
-    #                                   Save:
-    #================================================================================
-    # save done properly,  with timestamps:  
+    # Save:
+    #   Save done properly,  with timestamps:  
     np.save('{}smplxVerts_{}.npy'.format(output_dir_fname, timestamp), vertices    )
     # "local" save:
     np.save('{}currSmplxVerts.npy'.format(local_output_dir_fname), vertices    )
@@ -423,3 +488,103 @@ if __name__ == '__main__':
          gender=gender, plot_joints=plot_joints,
          plotting_module=plotting_module,
          use_face_contour=use_face_contour)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#============================================ BLANK LINES =============================================

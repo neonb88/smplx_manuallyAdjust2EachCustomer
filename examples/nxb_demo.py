@@ -83,9 +83,10 @@ def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, custome
 
 
 #==================================================
-def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, currBodyPartsXStretchingSlashScaling, currBodyPartsZStretchingSlashScaling):    # we don't have this customerEstimatedTibiaLenInches, 
-  # TODO: fill in the (numerous) details.  -nxb;   August 15;  9:50 P.M. EDT
-  raise Exception( "fucking finish your code, Bendich.")
+# generalized version:      def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, currBodyPartsXStretchingSlashScaling, currBodyPartsZStretchingSlashScaling):    # we don't have this customerEstimatedTibiaLenInches, 
+#==================================================
+def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxTibiaWidthInches_X,  customerEstimatedMaxTibiaDepthInches_Z):    # we don't have this customerEstimatedTibiaLenInches, 
+  #raise Exception( "fucking finish your code, Bendich.")
 
   # Idea:   have this spit out all the body parts with centroids at (0,0,0) ?    Then it's a different function's job to "put Humpty-Dumpty back together again"      -NXB, August 15, 2020
 
@@ -153,8 +154,17 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   #   Normalize tibiaLen to 1:
   #     NOTE:  (tibiaLen is ALMOST exactly "`Y`," but not **__QUITE__**)
   #     NOTE: maintains proportions of tibia;   **doesn't lose information**    -nxb; August 14, 2020
+  currHeightX = leftTibiaVertsCenteredOnOrigin[:,X].max() - leftTibiaVertsCenteredOnOrigin[:,X].min()
   currHeightY = leftTibiaVertsCenteredOnOrigin[:,Y].max() - leftTibiaVertsCenteredOnOrigin[:,Y].min()
-  leftTibiaVertsCenteredOnOrigin /= currHeightY
+  currHeightZ = leftTibiaVertsCenteredOnOrigin[:,Z].max() - leftTibiaVertsCenteredOnOrigin[:,Z].min()
+  leftTibiaVertsCenteredOnOrigin[:,X] /= currHeightX
+  leftTibiaVertsCenteredOnOrigin[:,Y] /= currHeightY
+  leftTibiaVertsCenteredOnOrigin[:,Z] /= currHeightZ
+  #========================================================================================
+  # Here the tibia is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
+  #                         -nxb, August 17, 2020
+  #========================================================================================
+
   #====================================================================================================================
   # NOTE
   # NOTE:  slight assumption that causes a problem:  I can't really scale  the tibia directly to yHeight==1, because the SMPL-X tibia we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
@@ -164,7 +174,13 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
 
   # Scale up again:
-  leftTibiaVertsCenteredOnOrigin *=customerEstimatedTibiaLenInches
+  leftTibiaVertsCenteredOnOrigin[:,X] *=customerEstimatedMaxTibiaWidthInches_X
+  leftTibiaVertsCenteredOnOrigin[:,Y] *=customerEstimatedTibiaLenInches
+  leftTibiaVertsCenteredOnOrigin[:,Z] *=customerEstimatedMaxTibiaDepthInches_Z
+  #=======================================================================================================================================================
+  # Here the tibia is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
+  #   -nxb, August 17, 2020
+  #=======================================================================================================================================================
   #leftTibiaVertsCenteredOnOriginScaledToRealTibiaLenInches = leftTibiaVertsCenteredOnOriginNormalizedTo1 * customerEstimatedTibiaLenInches
   #leftTibiaVertsCenteredOnOrigin *= customerEstimatedTibiaLenInches
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
@@ -175,22 +191,11 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   finalResizedLeftTibiaVerts = leftTibiaVertsCenteredOnOrigin + origTibiaCentroid
 
   return finalResizedLeftTibiaVerts, leftTibiaIdxes
+#================================================== end function def of   "getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxTibiaWidthInches_X,  customerEstimatedMaxTibiaDepthInches_Z):    # we don't have this customerEstimatedTibiaLenInches, ==================================================
 
 
-  '''     old ending to this func:    -nxb,     August 15,    at 8:50 P.M. EDT.   
-  resizedVerts = deepcopy(vertices)
-  print(" "* 9)
-  print("="*99)
-  print("resizedVerts.shape: ")
-  print(resizedVerts.shape)
-  print("="*99)
-  print(" "* 9)
-  resizedVerts[leftTibiaIdxes,: ] *= 2 # this line should do some weird geometry to the SMPL-X model's left tibia    -nxb, August 14, 2020
-  #vertices[:, leftTibiaIdxes] *= 2 # this line should do some weird geometry to the SMPL-X model's left tibia    -nxb, August 14, 2020
-  return resizedVerts
-  raise Exception( "fucking finish your code, Bendich.")
-  '''
-#==================================================
+
+
 
 #==================================================
 # TODO:  resurrect a general version of this (ie. all you have to do is tell it "lTibiaLen" or "lThighLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
@@ -299,6 +304,13 @@ def main(model_folder, model_type='smplx', ext='npz',
     print("  TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN :")  
     print( TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN )
     print("====================================================================")
+    # The CALF and
+    #   tibia"height"  are more important than the rest of the tibia.       -nxb, August 17, 2020
+      # FIXME NOTE TODO:               nxb got these measurements "TIM_TIBIA_WIDTH_AKA_X_INCHES  and TIM_TIBIA_DEPTH_AKA_Z_INCHES"  just by measuring ('eyeballing," technically) his own leg (tibia, shin, etc.)    -nxb, August 17, 2020
+    TIM_TIBIA_WIDTH_AKA_X_INCHES  = 4  #  This is the widest  TibiaWidth.   Obviously a tibia and a calf is a complicated thing.  The maxWidth ends up being of the calf.      (x is AKA    "fingertip-to-fingertip in T-pose" )
+    TIM_TIBIA_DEPTH_AKA_Z_INCHES  = 5  #  This is the deepest TibiaDepth.   Obviously the lower leg's skin has a complicated mesh that can't be captured with 2 or 3 lengths.  The maxDepth ends up being near the shin.      (z is AKA    "bellyButton-To-Spine," AKA "Dorsal-to-ventral")
+    TIM_ANKLE_WIDTH_AKA_X_INCHES  = 3.25 
+    TIM_ANKLE_DEPTH_AKA_Z_INCHES  = 3.75
 
     # """
     # NXB's tibia (measured with a real measuring tape) is roughly 
@@ -316,14 +328,22 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #================================================================================
     #================================================================================
-    reshapedLeftTibiaVerts, leftTibiaIdxes = getResizedLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
+    reshapedLeftTibiaVerts, leftTibiaIdxes = getResizedLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, TIM_TIBIA_WIDTH_AKA_X_INCHES, TIM_TIBIA_DEPTH_AKA_Z_INCHES)
+                                             #getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_TIBIA_WIDTH_AKA_X_INCHES, TIM_TIBIA_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedTibiaLenInches, 
     vertsWithReshapedLeftTibia = deepcopy(vertices)
     vertsWithReshapedLeftTibia[leftTibiaIdxes] = reshapedLeftTibiaVerts
+    #================================================================================
 
+    '''
     reshapedLeftThighVerts, leftThighIdxes = getResizedLeftSMPLX_Thigh(vertices, TIM_THIGH_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
     vertsWithReshapedLeftThigh = deepcopy(vertices)
     vertsWithReshapedLeftThigh[leftThighIdxes] = reshapedLeftThighVerts
+    '''
  
+
+
+
+
     '''
       maxesAndMins:             NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
         {'xMax': 0.8656285,

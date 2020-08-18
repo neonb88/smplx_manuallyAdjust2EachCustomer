@@ -469,30 +469,31 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #================================================================================
     #================================================================================
-
-
-
-
-
-    # FIXME:         uncomment these Tibia lines:          -nxb, Aug 17, 2020
-    """
     reshapedLeftTibiaVerts, leftTibiaIdxes = getResizedLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_TIBIA_WIDTH_AKA_X_INCHES, NXB_TIBIA_DEPTH_AKA_Z_INCHES)
                                              #getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_TIBIA_WIDTH_AKA_X_INCHES, TIM_TIBIA_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedTibiaLenInches, 
     vertsWithReshapedLeftTibia = deepcopy(vertices)
     vertsWithReshapedLeftTibia[leftTibiaIdxes] = reshapedLeftTibiaVerts
-    """
     #================================================================================
 
-    '''
+    '''       TODO:  thighs PLUS Tibias
     reshapedLeftThighVerts, leftThighIdxes = getResizedLeftSMPLX_Thigh(vertices, TIM_THIGH_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
     vertsWithReshapedLeftThigh = deepcopy(vertices)
     vertsWithReshapedLeftThigh[leftThighIdxes] = reshapedLeftThighVerts
     '''
-    reshapedLeftThighVerts, leftThighIdxes = getResizedLeftSMPLX_Thigh(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_TIBIA_WIDTH_AKA_X_INCHES, NXB_TIBIA_DEPTH_AKA_Z_INCHES) #getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_Thigh_WIDTH_AKA_X_INCHES, TIM_Thigh_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedThighLenInches, 
+
+    # TODO:     leftThighParams  for merging Thighs with lowerLegs        (in "`getResizedLeftSMPLX_Thigh(... , ... , ... )`")
+    reshapedLeftThighVerts, leftThighIdxes, leftThighParams = getResizedLeftSMPLX_Thigh(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_TIBIA_WIDTH_AKA_X_INCHES, NXB_TIBIA_DEPTH_AKA_Z_INCHES) #getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_Thigh_WIDTH_AKA_X_INCHES, TIM_Thigh_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedThighLenInches, 
     vertsWithReshapedLeftThigh = deepcopy(vertices)
     vertsWithReshapedLeftThigh[leftThighIdxes] = reshapedLeftThighVerts
  
+    # This stub/function header was written on August 17, 2020:       -nxb
+    leftLegVerts = makeLeftLeg(  
+      resizedLeftThighVerts, 
+      resizedLowerLegVerts,  
+      mergingParams={"leftThighParams":leftThighParams, "leftLowerLegParams":leftLowerLegParams}
+    )
 
+    vs
 
 
 

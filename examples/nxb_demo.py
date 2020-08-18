@@ -35,13 +35,34 @@ import smplx
 # imports   added by nxb, August 13, 2020   :
 import datetime # added by nxb, August 13, 2020
 from copy import deepcopy # Aug 14, 2020
+
+# pe and pn:
+#from utils import pe, pn # Aug 18, 2020
+def pn(n=0):  print('\n'*n) # Aug 18, 2020
+def pe(n=89): print('='*n) # Aug 18, 2020
 #==============================================
 
 
 
 
 #==================================================
-def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, customerEstimatedHeightInches, customerEstimatedMaxTibiaWidthInches_X, customerEstimatedMaxTibiaDepthInches_Z, customerEstimatedMaxThighWidthInches_X,  customerEstimatedMaxThighDepthInches_Z):
+def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, customerEstimatedHeightInches, customerEstimatedMaxLowerLegWidthInches_X, customerEstimatedMaxLowerLegDepthInches_Z, customerEstimatedMaxUpperLegWidthInches_X,  customerEstimatedMaxUpperLegDepthInches_Z):
+  '''
+    This UpperLeg function SHOULD do the following:                  (August 18, 2020)
+      (This docstring was written on August 18, 2020)
+
+      """
+        Expected, desired, non-buggy behavior:
+          1.  Returns vertices **__MOSTLY__** centered on (0,0,0),   except the yMin is now 0.   
+
+          2.  The truth is a little more detailed:
+            a.  Basically, the SMPL-X base model I'm using has the center of the chest at (0,0,0).  
+              (ie. The sternum is at the right xy position.  The anatomical location of z==0 is about as "deep" in the human body as the armpit(s))
+            b.  Therefore, the output mesh should have the "bottom of the UpperLeg" at y==0 for easier matching
+
+          This is only the way it should be for bodyParts like the UpperLeg-lowerLeg boundary where the translation-before-smoothing is all along the **__Y__** axis.  For instance, for the foreArm-upperArm boundary in T-pose, the boundary should be along the **__X__** axis **__INSTEAD__**
+      """
+  '''
   # TODO
   # TODO
   # TODO
@@ -52,7 +73,7 @@ def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, custome
   # TODO
   # TODO
   # TODO
-  #raise Exception( "fucking finish your thigh     code, Bendich.     ('getResizedLeftSMPLX_Thigh()'  is the full name)")
+  #raise Exception( "fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")
   
   '''
     Do a lot of shit here   [insertCode]
@@ -60,7 +81,7 @@ def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, custome
       (Coding all this shit might take 
         ~4 hours, give-or-take-a-few-minutes) based on the 
         "experiential data" for the other similar function   
-        "getResizedLeftSMPLX_Tibia()"
+        "getResizedLeftSMPLX_LowerLeg()"
   '''
 
   # Idea:   have this spit out all the body parts with centroids at (0,0,0) ?    Then it's a different function's job to "put Humpty-Dumpty back together again"      -NXB, August 15, 2020
@@ -76,10 +97,10 @@ def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, custome
 
 
   #===================================================================================================
-  # TODO:  find the EXACT RIGHT VERTICES  in SMPL-X that will let us scale the thigh correctly
+  # TODO:  find the EXACT RIGHT VERTICES  in SMPL-X that will let us scale the UpperLeg correctly
   #===================================================================================================
   # NOTE: NOTE: NOTE: NOTE: NOTE:  This code isn't perfect.  Ideally, every damn vertex in SMPL-X would be exactly where the customers' vertices are at that time.       
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
   # NOTE NOTE NOTE NOTE NOTE
   #===================================================================================================
   #===================================================================================================
@@ -90,71 +111,73 @@ def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, custome
     #===================================================================================================
     #   As of August 17, at 7:31 P.M.  EDT,   the function header was entitled:
     #===================================================================================================
-    # function header: "getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, customerEstimatedHeightInches):" 
+    # function header: "getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, customerEstimatedHeightInches):" 
     #===================================================================================================
   X,Y,Z=0,1,2
 
-  leftThighIdxes = leftThighIndices(vertices)
+  leftUpperLegIdxes = leftUpperLegIndices(vertices)
   print(" "* 9)
   print("="*99)
-  print("leftThighIndices: ")
-  print(leftThighIdxes)
-  print("leftThighIdxes.shape: ")
-  print(leftThighIdxes.shape)
+  print("leftUpperLegIndices: ")
+  print(leftUpperLegIdxes)
+  print("leftUpperLegIdxes.shape: ")
+  print(leftUpperLegIdxes.shape)
   print("="*99)
   print(" "* 9)
-  leftThighVerts = deepcopy(vertices[leftThighIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
+  leftUpperLegVerts = deepcopy(vertices[leftUpperLegIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
 
   # Center:
-  #   (newThighCentroid = (0,0,0)  )
-  origThighCentroid = leftThighVerts.mean(axis=0)  # DOWN=0
+  #   (newUpperLegCentroid = (0,0,0)  )
+  origUpperLegCentroid = leftUpperLegVerts.mean(axis=0)  # DOWN=0
   #====================================================================================
-  # TODO: rename all these hellishly-long-variable names to simply "leftThighVerts"  
+  # TODO: rename all these hellishly-long-variable names to simply "leftUpperLegVerts"  
   #====================================================================================
-  leftThighVertsCenteredOnOrigin = leftThighVerts - origThighCentroid
+  leftUpperLegVertsCenteredOnOrigin = leftUpperLegVerts - origUpperLegCentroid
 
   # Scale down:
-  #   Normalize thighLen to 1:
-  #     NOTE:  (thighLen is ALMOST exactly "`Y`," but not **__QUITE__**)
-  #     NOTE: maintains proportions of thigh;   **doesn't lose information**    -nxb; August 14, 2020
-  currHeightX = leftThighVertsCenteredOnOrigin[:,X].max() - leftThighVertsCenteredOnOrigin[:,X].min()
-  currHeightY = leftThighVertsCenteredOnOrigin[:,Y].max() - leftThighVertsCenteredOnOrigin[:,Y].min()
-  currHeightZ = leftThighVertsCenteredOnOrigin[:,Z].max() - leftThighVertsCenteredOnOrigin[:,Z].min()
-  leftThighVertsCenteredOnOrigin[:,X] /= currHeightX
-  leftThighVertsCenteredOnOrigin[:,Y] /= currHeightY
-  leftThighVertsCenteredOnOrigin[:,Z] /= currHeightZ
+  #   Normalize UpperLegLen to 1:
+  #     NOTE:  (UpperLegLen is ALMOST exactly "`Y`," but not **__QUITE__**)
+  #     NOTE: maintains proportions of UpperLeg;   **doesn't lose information**    -nxb; August 14, 2020
+  currHeightX = leftUpperLegVertsCenteredOnOrigin[:,X].max() - leftUpperLegVertsCenteredOnOrigin[:,X].min()
+  currHeightY = leftUpperLegVertsCenteredOnOrigin[:,Y].max() - leftUpperLegVertsCenteredOnOrigin[:,Y].min()
+  currHeightZ = leftUpperLegVertsCenteredOnOrigin[:,Z].max() - leftUpperLegVertsCenteredOnOrigin[:,Z].min()
+  leftUpperLegVertsCenteredOnOrigin[:,X] /= currHeightX
+  leftUpperLegVertsCenteredOnOrigin[:,Y] /= currHeightY
+  leftUpperLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
   #========================================================================================
-  # Here the thigh is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
+  # Here the UpperLeg (AKA thigh) is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
   #                         -nxb, August 17, 2020
   #========================================================================================
 
   #====================================================================================================================
   # NOTE
-  # NOTE:  slight assumption that causes a problem:  I can't really scale  the thigh directly to yHeight==1, because the SMPL-X thigh we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
+  # NOTE:  slight assumption that causes a problem:  I can't really scale  the upperLeg directly to yHeight==1, because the SMPL-X upperLeg we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
   # NOTE
   #====================================================================================================================
   #   In code, "T-Pose" translates to      ("` theta==np.zeros( 127*3 )`")
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the thigh correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the upperLeg correctly 
 
   # Scale up again:
-  leftThighVertsCenteredOnOrigin[:,X] *=customerEstimatedMaxThighWidthInches_X
-  leftThighVertsCenteredOnOrigin[:,Y] *=customerEstimatedThighLenInches
-  leftThighVertsCenteredOnOrigin[:,Z] *=customerEstimatedMaxThighDepthInches_Z
+  leftUpperLegVertsCenteredOnOrigin[:,X] *=customerEstimatedMaxUpperLegWidthInches_X
+  leftUpperLegVertsCenteredOnOrigin[:,Y] *=customerEstimatedUpperLegLenInches
+  leftUpperLegVertsCenteredOnOrigin[:,Z] *=customerEstimatedMaxUpperLegDepthInches_Z
   #=======================================================================================================================================================
-  # Here the thigh is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
+  # Here the upperLeg is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
   #   -nxb, August 17, 2020
   #=======================================================================================================================================================
-  #leftThighVertsCenteredOnOriginScaledToRealThighLenInches = leftThighVertsCenteredOnOriginNormalizedTo1 * customerEstimatedThighLenInches
-  #leftThighVertsCenteredOnOrigin *= customerEstimatedThighLenInches
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the thigh correctly 
+  #leftUpperLegVertsCenteredOnOriginScaledToRealUpperLegLenInches = leftUpperLegVertsCenteredOnOriginNormalizedTo1 * customerEstimatedUpperLegLenInches
+  #leftUpperLegVertsCenteredOnOrigin *= customerEstimatedUpperLegLenInches
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the upperLeg correctly 
 
   # Translate:
   #   Translate back to original centroid: 
   #     (where the rest of the SMPL-X body STILL is)
-  finalResizedLeftThighVerts = leftThighVertsCenteredOnOrigin + origThighCentroid
+  finalResizedLeftUpperLegVertsTranslatedBack = leftUpperLegVertsCenteredOnOrigin + origUpperLegCentroid
+  # Set yMin to 0:        (see docstring for more details)
+  finalResizedLeftUpperLegVertsTranslatedBack[:,Y] -= finalResizedLeftUpperLegVertsTranslatedBack[:,Y].min()
 
-  return finalResizedLeftThighVerts, leftThighIdxes
-#================================================== end function def of   "getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxThighWidthInches_X,  customerEstimatedMaxThighDepthInches_Z):     ==================================================
+  return finalResizedLeftUpperLegVertsTranslatedBack, leftUpperLegIdxes, {} # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "makeLeftLeg(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
+#================================================== end function def of   "getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxUpperLegWidthInches_X,  customerEstimatedMaxUpperLegDepthInches_Z):     ==================================================
 
 #==================================================
 
@@ -164,17 +187,34 @@ def getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches, custome
 
 #==================================================
 # generalized version:      
-#     def getResizedLeftSMPLX_Tibia(
+#     def getResizedLeftSMPLX_LowerLeg(
 #         vertices,
-#         customerEstimatedTibiaLenInches,
+#         customerEstimatedLowerLegLenInches,
 #         customerEstimatedHeightInches, 
 #         prevBodyPartsXStretchingSlashScaling,  
 #         prevBodyPartsZStretchingSlashScaling,  
 #         currBodyPartsXStretchingSlashScaling,  
 #         currBodyPartsZStretchingSlashScaling): 
-#       # we don't have this variable "`customerEstimatedTibiaLenInches`"  , 
+#       # we don't have this variable "`customerEstimatedLowerLegLenInches`"  , 
 #==================================================
-def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxTibiaWidthInches_X,  customerEstimatedMaxTibiaDepthInches_Z):
+def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
+  '''
+    This lowerLeg function SHOULD do the following:                  (August 18, 2020)
+      (This docstring was written on August 18, 2020)
+
+      """
+        Expected, desired, non-buggy behavior:
+          1.  Returns vertices **__MOSTLY__** centered on (0,0,0),   except the yMin is now 0.   
+
+          2.  The truth is a little more detailed:
+            a.  Basically, the SMPL-X base model I'm using has the center of the chest at (0,0,0).  
+              (ie. The sternum is at the right xy position.  The anatomical location of z==0 is about as "deep" in the human body as the armpit(s))
+            b.  Therefore, the output mesh should have the "bottom of the lowerLeg" at y==0 for easier matching
+
+          This is only the way it should be for bodyParts like the upperLeg-lowerLeg boundary where the translation-before-smoothing is all along the **__Y__** axis.  For instance, for the foreArm-upperArm boundary in T-pose, the boundary should be along the **__X__** axis **__INSTEAD__**
+      """
+  '''
+
   #raise Exception( "fucking finish your code, Bendich.")
 
   # Idea:   have this spit out all the body parts with centroids at (0,0,0) ?    Then it's a different function's job to "put Humpty-Dumpty back together again"      -NXB, August 15, 2020
@@ -189,7 +229,7 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   '''
 
 
-  # TODO:  find the EXACT RIGHT VERTEX  in SMPL-X that will let us scale the tibia correctly
+  # TODO:  find the EXACT RIGHT VERTEX  in SMPL-X that will let us scale the lowerLeg correctly
   #===================================================================================================
   #===================================================================================================
   #===================================================================================================
@@ -199,10 +239,10 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
   # NOTE NOTE NOTE NOTE NOTE
   # NOTE NOTE NOTE NOTE NOTE
   # NOTE NOTE NOTE NOTE NOTE
-  # NOTE: NOTE: NOTE: NOTE: NOTE:  slight assumption that causes a problem:  I can't really scale  the tibia directly to yHeight==1, because the SMPL-X tibia we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  # NOTE: NOTE: NOTE: NOTE: NOTE:  slight assumption that causes a problem:  I can't really scale  the lowerLeg directly to yHeight==1, because the SMPL-X lowerLeg we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
   # NOTE NOTE NOTE NOTE NOTE
   # NOTE NOTE NOTE NOTE NOTE
   # NOTE NOTE NOTE NOTE NOTE
@@ -216,108 +256,110 @@ def getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, custome
     #===================================================================================================
     #   As of August 15, at 8:31 P.M.  EDT,   the function header was entitled:
     #===================================================================================================
-    # function header " getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches): "
+    # function header " getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches): "
     #===================================================================================================
   X,Y,Z=0,1,2
 
-  leftTibiaIdxes = leftTibiaIndices(vertices)
+  leftLowerLegIdxes = leftLowerLegIndices(vertices)
   print(" "* 9)
   print("="*99)
-  print("leftTibiaIndices: ")
-  print(leftTibiaIdxes)
-  print("leftTibiaIdxes.shape: ")
-  print(leftTibiaIdxes.shape)
+  print("leftLowerLegIndices: ")
+  print(leftLowerLegIdxes)
+  print("leftLowerLegIdxes.shape: ")
+  print(leftLowerLegIdxes.shape)
   print("="*99)
   print(" "* 9)
-  leftTibiaVerts = deepcopy(vertices[leftTibiaIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
+  leftLowerLegVerts = deepcopy(vertices[leftLowerLegIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
 
   # Center:
-  #   (newTibiaCentroid = (0,0,0)  )
-  origTibiaCentroid = leftTibiaVerts.mean(axis=0)  # DOWN=0
+  #   (newLowerLegCentroid = (0,0,0)  )
+  origLowerLegCentroid = leftLowerLegVerts.mean(axis=0)  # DOWN=0
   #====================================================================================
-  # TODO: rename all these hellishly-long-variable names to simply "leftTibiaVerts"  
+  # TODO: rename all these hellishly-long-variable names to simply "leftLowerLegVerts"  
   #====================================================================================
-  leftTibiaVertsCenteredOnOrigin = leftTibiaVerts - origTibiaCentroid
+  leftLowerLegVertsCenteredOnOrigin = leftLowerLegVerts - origLowerLegCentroid
 
   # Scale down:
-  #   Normalize tibiaLen to 1:
-  #     NOTE:  (tibiaLen is ALMOST exactly "`Y`," but not **__QUITE__**)
-  #     NOTE: maintains proportions of tibia;   **doesn't lose information**    -nxb; August 14, 2020
-  currHeightX = leftTibiaVertsCenteredOnOrigin[:,X].max() - leftTibiaVertsCenteredOnOrigin[:,X].min()
-  currHeightY = leftTibiaVertsCenteredOnOrigin[:,Y].max() - leftTibiaVertsCenteredOnOrigin[:,Y].min()
-  currHeightZ = leftTibiaVertsCenteredOnOrigin[:,Z].max() - leftTibiaVertsCenteredOnOrigin[:,Z].min()
-  leftTibiaVertsCenteredOnOrigin[:,X] /= currHeightX
-  leftTibiaVertsCenteredOnOrigin[:,Y] /= currHeightY
-  leftTibiaVertsCenteredOnOrigin[:,Z] /= currHeightZ
+  #   Normalize lowerLegLen to 1:
+  #     NOTE:  (lowerLegLen is ALMOST exactly "`Y`," but not **__QUITE__**)
+  #     NOTE: maintains proportions of lowerLeg;   **doesn't lose information**    -nxb; August 14, 2020
+  currHeightX = leftLowerLegVertsCenteredOnOrigin[:,X].max() - leftLowerLegVertsCenteredOnOrigin[:,X].min()
+  currHeightY = leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
+  currHeightZ = leftLowerLegVertsCenteredOnOrigin[:,Z].max() - leftLowerLegVertsCenteredOnOrigin[:,Z].min()
+  leftLowerLegVertsCenteredOnOrigin[:,X] /= currHeightX
+  leftLowerLegVertsCenteredOnOrigin[:,Y] /= currHeightY
+  leftLowerLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
   #========================================================================================
-  # Here the tibia is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
+  # Here the lowerLeg is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
   #                         -nxb, August 17, 2020
   #========================================================================================
 
   #====================================================================================================================
   # NOTE
-  # NOTE:  slight assumption that causes a problem:  I can't really scale  the tibia directly to yHeight==1, because the SMPL-X tibia we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
+  # NOTE:  slight assumption that causes a problem:  I can't really scale  the lowerLeg directly to yHeight==1, because the SMPL-X lowerLeg we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
   # NOTE
   #====================================================================================================================
   #   In code, "T-Pose" translates to      ("` theta==np.zeros( 127*3 )`")
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
 
   # Scale up again:
-  leftTibiaVertsCenteredOnOrigin[:,X] *=customerEstimatedMaxTibiaWidthInches_X
-  leftTibiaVertsCenteredOnOrigin[:,Y] *=customerEstimatedTibiaLenInches
-  leftTibiaVertsCenteredOnOrigin[:,Z] *=customerEstimatedMaxTibiaDepthInches_Z
+  leftLowerLegVertsCenteredOnOrigin[:,X] *=customerEstimatedMaxLowerLegWidthInches_X
+  leftLowerLegVertsCenteredOnOrigin[:,Y] *=customerEstimatedLowerLegLenInches
+  leftLowerLegVertsCenteredOnOrigin[:,Z] *=customerEstimatedMaxLowerLegDepthInches_Z
   #=======================================================================================================================================================
-  # Here the tibia is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
+  # Here the lowerLeg is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
   #   -nxb, August 17, 2020
   #=======================================================================================================================================================
-  #leftTibiaVertsCenteredOnOriginScaledToRealTibiaLenInches = leftTibiaVertsCenteredOnOriginNormalizedTo1 * customerEstimatedTibiaLenInches
-  #leftTibiaVertsCenteredOnOrigin *= customerEstimatedTibiaLenInches
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the tibia correctly 
+  #leftLowerLegVertsCenteredOnOriginScaledToRealLowerLegLenInches = leftLowerLegVertsCenteredOnOriginNormalizedTo1 * customerEstimatedLowerLegLenInches
+  #leftLowerLegVertsCenteredOnOrigin *= customerEstimatedLowerLegLenInches
+  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
 
   # Translate:
   #   Translate back to original centroid: 
   #     (where the rest of the SMPL-X body STILL is)
-  finalResizedLeftTibiaVerts = leftTibiaVertsCenteredOnOrigin + origTibiaCentroid
+  finalResizedLeftLowerLegVertsTranslatedBack = leftLowerLegVertsCenteredOnOrigin + origLowerLegCentroid
+  # Set yMin to 0:        (see docstring for more details)
+  finalResizedLeftLowerLegVertsTranslatedBack[:,Y] -=  finalResizedLeftLowerLegVertsTranslatedBack[:,Y].min()
 
-  return finalResizedLeftTibiaVerts, leftTibiaIdxes
-#================================================== end function def of   "getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxTibiaWidthInches_X,  customerEstimatedMaxTibiaDepthInches_Z):    # we don't have this customerEstimatedTibiaLenInches, ==================================================
+  return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, {} # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "makeLeftLeg(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
+#================================================== end function def of   "getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):    # we don't have this customerEstimatedLowerLegLenInches, ==================================================
 
 
 
 
 
 #==================================================
-# TODO:  resurrect a general version of this (ie. all you have to do is tell it "lTibiaLen" or "lThighLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
+# TODO:  resurrect a general version of this (ie. all you have to do is tell it "lLowerLegLen" or "lUpperLegLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
 """
-  # TODO:  resurrect a general version of this (ie. all you have to do is tell it "lTibiaLen" or "lThighLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
+  # TODO:  resurrect a general version of this (ie. all you have to do is tell it "lLowerLegLen" or "lUpperLegLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
 def filterVerts(vs):
   '''
-    TODO:  generalize w/ a keyword arguments?      (ie. "lTibia" or "lThigh" or "lFoot" or whatever)
+    TODO:  generalize w/ a keyword arguments?      (ie. "lLowerLeg" or "lUpperLeg" or "lFoot" or whatever)
       -nxb; Aug 14, 2020
   '''
-  return filterVertsLeftTibia(vs)
+  return filterVertsLeftLowerLeg(vs)
 """
 #==================================================
 
 #==================================================
-def leftThighIndices(vs):
-#def filterVertsLeftTibia(vs):
+def leftUpperLegIndices(vs):
+#def filterVertsLeftLowerLeg(vs):
   L_KNEE_Y_HEIGHT         = -0.8582508 
-  L_TOP_OF_THIGH_Y_HEIGHT = -0.58      # I "calculated" this value   "-0.58" in    Blender.  -nxb, Aug 14, 2020 
+  L_TOP_OF_UPPER_LEG_Y_HEIGHT = -0.58      # I "calculated" this value   "-0.58" in    Blender.  -nxb, Aug 14, 2020 
   # FIXME:   we're in debug mode:   use the "-0.58" value from above instead
-  MIDDLE_OF_BODY_X = 0      # **__ROUGHLY__** correct;   certainly correct enough to distinguish between the left and right tibias (in t-pose with legs "fairly widely" spread)
+  MIDDLE_OF_BODY_X = 0      # **__ROUGHLY__** correct;   certainly correct enough to distinguish between the left and right lowerLegs (in t-pose with legs "fairly widely" spread)
 
   #==============================
   #   Useful for debugging:
   #     -nxb, August 17, 2020
   #==============================
-  #L_TOP_OF_THIGH_Y_HEIGHT = -0.46138254# from "smplx/joint_names.py"      (AKA from file "joints.npy")
+  #L_TOP_OF_UPPER_LEG_Y_HEIGHT = -0.46138254# from "smplx/joint_names.py"      (AKA from file "joints.npy")
   #MIDDLE_OF_BODY_X = -0.5 
   X,Y,Z = 0,1,2
 
   belowButtIdxs = np.where(   
     np.less(vs[:,Y],   
-            L_TOP_OF_THIGH_Y_HEIGHT))[0]
+            L_TOP_OF_UPPER_LEG_Y_HEIGHT))[0]
   aboveKneeIdxs = np.where(   
     np.greater(vs[:,Y],   
             L_KNEE_Y_HEIGHT))[0]
@@ -326,20 +368,20 @@ def leftThighIndices(vs):
             MIDDLE_OF_BODY_X))[0]
 
   # belowButt AND aboveKnees:
-  thighsVertsIdxs     = np.intersect1d(  aboveKneeIdxs,   belowButtIdxs) 
-  leftThighsVertsIdxs = np.intersect1d(  thighsVertsIdxs, leftSideOfBodyIdxs) 
-  return leftThighsVertsIdxs
-  #leftThigh           = vs[leftThighsVertsIdxs, :]
-  #return leftThigh
+  upperLegsVertsIdxs     = np.intersect1d(  aboveKneeIdxs,   belowButtIdxs) 
+  leftUpperLegsVertsIdxs = np.intersect1d(  upperLegsVertsIdxs, leftSideOfBodyIdxs) 
+  return leftUpperLegsVertsIdxs
+  #leftUpperLeg           = vs[leftUpperLegsVertsIdxs, :]
+  #return leftUpperLeg
 #==================================================
 
 
 #==================================================
-def leftTibiaIndices(vs):
-#def filterVertsLeftTibia(vs):
+def leftLowerLegIndices(vs):
+#def filterVertsLeftLowerLeg(vs):
   L_KNEE_Y_HEIGHT  = -0.8582508 
   L_ANKLE_Y_HEIGHT = -1.2795366  
-  MIDDLE_OF_BODY_X = 0      # **__ROUGHLY__** correct;   certainly correct enough to distinguish between the left and right tibias (in t-pose with legs "fairly widely" spread)
+  MIDDLE_OF_BODY_X = 0      # **__ROUGHLY__** correct;   certainly correct enough to distinguish between the left and right lowerLegs (in t-pose with legs "fairly widely" spread)
   X,Y,Z = 0,1,2
 
   belowKneeIdxs = np.where(   
@@ -353,11 +395,11 @@ def leftTibiaIndices(vs):
             MIDDLE_OF_BODY_X))[0]
 
   # belowKnees AND aboveAnkles:
-  tibiasVertsIdxs     = np.intersect1d(  aboveAnkleIdxs,  belowKneeIdxs) 
-  leftTibiasVertsIdxs = np.intersect1d(  tibiasVertsIdxs, leftSideOFBodyIdxs) 
-  return leftTibiasVertsIdxs
-  #leftTibia           = vs[leftTibiasVertsIdxs, :]
-  #return leftTibia
+  lowerLegsVertsIdxs     = np.intersect1d(  aboveAnkleIdxs,  belowKneeIdxs) 
+  leftLowerLegsVertsIdxs = np.intersect1d(  lowerLegsVertsIdxs, leftSideOFBodyIdxs) 
+  return leftLowerLegsVertsIdxs
+  #leftLowerLeg           = vs[leftLowerLegsVertsIdxs, :]
+  #return leftLowerLeg
 #==================================================
 
 
@@ -372,7 +414,9 @@ def main(model_folder, model_type='smplx', ext='npz',
     model = smplx.create(model_folder, model_type=model_type,
                          gender=gender, use_face_contour=use_face_contour,
                          ext=ext)
+    # nxb added the following lines (Aug 18, 2020)
     print(model)
+    X,Y,Z=0,1,2
 
     #output_dir_fname='/home/nathan_bendich/Documents/code/gitCloned/smplx/examples/out_meshes/'  # in DropBox now.     -nxb;   August 14, 2020.
     output_dir_fname='/home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/smplx_manuallyAdjust2EachCustomer/examples/out_meshes/'
@@ -386,13 +430,13 @@ def main(model_folder, model_type='smplx', ext='npz',
     output = model(betas=betas, expression=expression,
                    return_verts=True)
     vertices = output.vertices.detach().cpu().numpy().squeeze()
-    #TIM_ESTIMATED_TIBIA_LENGTH_INCHES = ...  # TODO: automate estimating customer's tibia length from video(s) and OpenPose.  -nxb, August 14, 2020
+    #TIM_ESTIMATED_LOWER_LEG_LENGTH_INCHES = ...  # TODO: automate estimating customer's lowerLeg length from video(s) and OpenPose.  -nxb, August 14, 2020
     # NOTE: 
     '''       -nxb, August 14, 2020
       For both:
         1.    TIM_PIXEL_HEIGHT_INCHES  and
           (and)
-        2.    TIM_LEFT_TIBIA_PIXEL_LEN_INCHES
+        2.    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES
       I (NXB) measured Tim's height in inches using a video of him, viewed on my laptop screen, and then held up a ruler to measure it.
       The pic of him can be found in NXB's Dropbox (Dropbox/vr_mal.../IMPOR.../Tim_Schrader_8_frames.../*)     
       (The filepath on NXB's HP laptop is "` /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `")
@@ -407,7 +451,7 @@ def main(model_folder, model_type='smplx', ext='npz',
           I measured between 
             1. the top of    Tim's head on the screen and   
             2. the bottom of Tim's feet on the screen
-        b) for TIM_LEFT_TIBIA_PIXEL_LEN_INCHES  
+        b) for TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES  
           I measured between 
             1. the "inside" of Tim's knee on the screen and the    
             2. the  inside of Tim's left ankle on the screen
@@ -417,21 +461,21 @@ def main(model_folder, model_type='smplx', ext='npz',
     '''
     # end NOTE:
     TIM_PIXEL_HEIGHT_INCHES = 5.6875
-    TIM_LEFT_TIBIA_PIXEL_LEN_INCHES = 1.375
+    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES = 1.375
     TIM_SELF_REPORTED_HEIGHT_INCHES = 74     #   Tim's probably exaggerating how tall he is.
     # "Tim's probably shorter than he says he is" comment continued:    "but I guess I'll cut him some slack for a fucking sec.  Of course, when it comes to literally getting him ideal jeans, we should use camera parameters to estimate his body measurements better."   -nxb, August 14, 2020   
-    TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN = \
-      TIM_LEFT_TIBIA_PIXEL_LEN_INCHES *\
+    TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN = \
+      TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES *\
       (TIM_SELF_REPORTED_HEIGHT_INCHES / TIM_PIXEL_HEIGHT_INCHES) # how many "real" inches are in 1 pixel inch   
       #(on my laptop in `feh`, when I hit "down" 3 times, with Tim's Photo
     print("====================================================================")
-    print("  TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN :"  )  
-    print(   TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN     )
+    print("  TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN :"  )  
+    print(   TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN     )
     print("====================================================================")
     # The CALF and
-    #   tibia"height"  are more important than the rest of the tibia.       -nxb, August 17, 2020
+    #   lowerLeg"height"  are more important than the rest of the lowerLeg.       -nxb, August 17, 2020
 
-      # FIXME NOTE TODO:               nxb got these measurements "TIM_TIBIA_WIDTH_AKA_X_INCHES  and TIM_TIBIA_DEPTH_AKA_Z_INCHES"  just by measuring ('eyeballing," technically) his own leg (tibia, shin, etc.)    -nxb, August 17, 2020
+      # FIXME NOTE TODO:               nxb got these measurements "TIM_LOWER_LEG_WIDTH_AKA_X_INCHES  and TIM_LOWER_LEG_DEPTH_AKA_Z_INCHES"  just by measuring ('eyeballing," technically) his own leg (lowerLeg, shin, etc.)    -nxb, August 17, 2020
 
 
 
@@ -442,9 +486,9 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #=========================== Right now they're NXB's ============================
     #================================================================================
-    # FIXME NOTE TODO:  These tibia measurements are Nathan's, not Tim's.  I've got to put Tim's measurements in.  -nxb, August 17, 2020
-    NXB_TIBIA_WIDTH_AKA_X_INCHES  = 4  #  This is the widest  TibiaWidth.   Obviously a tibia and a calf is a complicated thing.  The maxWidth ends up being of the calf.      (x is AKA    "fingertip-to-fingertip in T-pose" )
-    NXB_TIBIA_DEPTH_AKA_Z_INCHES  = 5  #  This is the deepest TibiaDepth.   Obviously the lower leg's skin has a complicated mesh that can't be captured with 2 or 3 lengths.  The maxDepth ends up being near the shin.      (z is AKA    "bellyButton-To-Spine," AKA "Dorsal-to-ventral")
+    # FIXME NOTE TODO:  These lowerLeg measurements are Nathan's, not Tim's.  I've got to put Tim's measurements in.  -nxb, August 17, 2020
+    NXB_LOWER_LEG_WIDTH_AKA_X_INCHES  = 4  #  This is the widest  LowerLegWidth.   Obviously a lowerLeg and a calf is a complicated thing.  The maxWidth ends up being of the calf.      (x is AKA    "fingertip-to-fingertip in T-pose" )
+    NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES  = 5  #  This is the deepest LowerLegDepth.   Obviously the lower leg's skin has a complicated mesh that can't be captured with 2 or 3 lengths.  The maxDepth ends up being near the shin.      (z is AKA    "bellyButton-To-Spine," AKA "Dorsal-to-ventral")
     #================================================================================
     #================================================================================
     #================================================================================
@@ -453,10 +497,10 @@ def main(model_folder, model_type='smplx', ext='npz',
     TIM_ANKLE_DEPTH_AKA_Z_INCHES  = 3.75
 
     # """
-    # NXB's tibia (measured with a real measuring tape) is roughly 
+    # NXB's lowerLeg (measured with a real measuring tape) is roughly 
     #   18 inches, 
     #     and my calculation says 
-    #   17.89 inches for Tim Schrader's tibia.  
+    #   17.89 inches for Tim Schrader's lowerLeg.  
     # So my calculation is is probably MOSTLY correct.    
     # """
     #    -nxb;   on August 14, 2020      (more technically, 8:19 P.M. EDT    on August 14, 2020)
@@ -465,40 +509,56 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #================================================================================
     #  Major Line:                                                                 
-    #                  (" ` resizeLeftSMPLX_Tibia(...) ` "  contains a LOT of code)
+    #                  (" ` resizeLeftSMPLX_LowerLeg(...) ` "  contains a LOT of code)
     #================================================================================
     #================================================================================
     #================================================================================
-    reshapedLeftTibiaVerts, leftTibiaIdxes = getResizedLeftSMPLX_Tibia(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_TIBIA_WIDTH_AKA_X_INCHES, NXB_TIBIA_DEPTH_AKA_Z_INCHES)
-                                             #getResizedLeftSMPLX_Tibia(vertices, customerEstimatedTibiaLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_TIBIA_WIDTH_AKA_X_INCHES, TIM_TIBIA_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedTibiaLenInches, 
-    vertsWithReshapedLeftTibia = deepcopy(vertices)
-    vertsWithReshapedLeftTibia[leftTibiaIdxes] = reshapedLeftTibiaVerts
+    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegParams = getResizedLeftSMPLX_LowerLeg(vertices, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
+                                             #getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_LOWER_LEG_WIDTH_AKA_X_INCHES, TIM_LOWER_LEG_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedLowerLegLenInches, 
+    vertsWithResizedLeftLowerLeg = deepcopy(vertices)
+    vertsWithResizedLeftLowerLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
     #================================================================================
 
-    '''       TODO:  thighs PLUS Tibias
-    reshapedLeftThighVerts, leftThighIdxes = getResizedLeftSMPLX_Thigh(vertices, TIM_THIGH_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES)
-    vertsWithReshapedLeftThigh = deepcopy(vertices)
-    vertsWithReshapedLeftThigh[leftThighIdxes] = reshapedLeftThighVerts
-    '''
-
-    # TODO:     leftThighParams  for merging Thighs with lowerLegs        (in "`getResizedLeftSMPLX_Thigh(... , ... , ... )`")
-    reshapedLeftThighVerts, leftThighIdxes, leftThighParams = getResizedLeftSMPLX_Thigh(vertices, TIM_TIBIA_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_TIBIA_WIDTH_AKA_X_INCHES, NXB_TIBIA_DEPTH_AKA_Z_INCHES) #getResizedLeftSMPLX_Thigh(vertices, customerEstimatedThighLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_Thigh_WIDTH_AKA_X_INCHES, TIM_Thigh_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedThighLenInches, 
-    vertsWithReshapedLeftThigh = deepcopy(vertices)
-    vertsWithReshapedLeftThigh[leftThighIdxes] = reshapedLeftThighVerts
+    # TODO:     leftUpperLegParams  for merging UpperLegs with lowerLegs        (in "`getResizedLeftSMPLX_UpperLeg(... , ... , ... )`")
+    resizedLeftUpperLegVerts, leftUpperLegIdxes, leftUpperLegParams = getResizedLeftSMPLX_UpperLeg(vertices, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
+    #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
+    vertsWithResizedLeftUpperLeg = deepcopy(vertices)
+    vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
  
-    # This stub/function header was written on August 17, 2020:       -nxb
-    leftLegVerts = makeLeftLeg(  
-      resizedLeftThighVerts, 
-      resizedLowerLegVerts,  
-      mergingParams={"leftThighParams":leftThighParams, "leftLowerLegParams":leftLowerLegParams}
-    )
 
-    vs
+
+    #====================================================================
+    # TODO:  put this code into func "makeLeftLeg(... , ... , ... , ...)"
+    #====================================================================
+    #                            start
+    #====================================================================
+    resizedLeftUpperLegVerts[:,Y] += resizedLeftLowerLegVerts[:,Y].max() # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )
+    vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
+    vertsWithResizedLeftLeg = deepcopy(vertsWithResizedLeftUpperLeg)
+    vertsWithResizedLeftLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
+    vertsWithResizedLeftLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
+
+    #====================================================================
+    #                             end
+    #====================================================================
+    # TODO:  put this code into func "makeLeftLeg(... , ... , ... , ...)"
+    #====================================================================
+
+
+    # This stub/function header was written on August 17, 2020:       -nxb
+    """
+    leftLegVerts = makeLeftLeg(  
+      resizedLeftUpperLegVerts, 
+      resizedLeftLowerLegVerts,  
+      mergingParams={"leftUpperLegParams":leftUpperLegParams, "leftLowerLegParams":leftLowerLegParams}
+    )
+    vs  = ...
+    """
 
 
 
     '''
-      maxesAndMins:             NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
+      maxesAndMins:           NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
         {'xMax': 0.8656285,
          'xMin': -0.8656085,
          'yMax': 0.43483356,
@@ -538,13 +598,19 @@ def main(model_folder, model_type='smplx', ext='npz',
           =============================================================================
           =============================================================================
         '''
+        # Lower:
         """
-        reshapedTrimesh =  trimesh.Trimesh(vertsWithReshapedLeftTibia, model.faces,
+        resizedTrimesh =  trimesh.Trimesh(vertsWithResizedLeftLowerLeg, model.faces,
                                    vertex_colors=vertex_colors) # nxb, Aug 13, 2020
         """
-        reshapedTrimesh =  trimesh.Trimesh(vertsWithReshapedLeftThigh, model.faces,
+        # Upper:
+        """
+        resizedTrimesh =  trimesh.Trimesh(vertsWithResizedLeftUpperLeg, model.faces,
                                    vertex_colors=vertex_colors) # nxb, Aug 13, 2020
-        mesh = pyrender.Mesh.from_trimesh(reshapedTrimesh)
+        """
+        resizedTrimesh =  trimesh.Trimesh(vertsWithResizedLeftLeg, model.faces,
+                                   vertex_colors=vertex_colors) # nxb, Aug 13, 2020
+        mesh = pyrender.Mesh.from_trimesh(resizedTrimesh)
 
         scene = pyrender.Scene()
         scene.add(mesh)

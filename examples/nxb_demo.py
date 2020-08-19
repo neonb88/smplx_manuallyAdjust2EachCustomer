@@ -63,16 +63,6 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
           This is only the way it should be for bodyParts like the UpperLeg-lowerLeg boundary where the translation-before-smoothing is all along the **__Y__** axis.  For instance, for the foreArm-upperArm boundary in T-pose, the boundary should be along the **__X__** axis **__INSTEAD__**
       """
   '''
-  # TODO
-  # TODO
-  # TODO
-  # TODO
-  # TODO
-  # TODO
-  # TODO
-  # TODO
-  # TODO
-  # TODO
   #raise Exception( "fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")
   
   '''
@@ -116,14 +106,6 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
   X,Y,Z=0,1,2
 
   leftUpperLegIdxes = leftUpperLegIndices(vertices)
-  print(" "* 9)
-  print("="*99)
-  print("leftUpperLegIndices: ")
-  print(leftUpperLegIdxes)
-  print("leftUpperLegIdxes.shape: ")
-  print(leftUpperLegIdxes.shape)
-  print("="*99)
-  print(" "* 9)
   leftUpperLegVerts = deepcopy(vertices[leftUpperLegIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
 
   # Center:
@@ -261,14 +243,6 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   X,Y,Z=0,1,2
 
   leftLowerLegIdxes = leftLowerLegIndices(vertices)
-  print(" "* 9)
-  print("="*99)
-  print("leftLowerLegIndices: ")
-  print(leftLowerLegIdxes)
-  print("leftLowerLegIdxes.shape: ")
-  print(leftLowerLegIdxes.shape)
-  print("="*99)
-  print(" "* 9)
   leftLowerLegVerts = deepcopy(vertices[leftLowerLegIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
 
   # Center:
@@ -451,7 +425,6 @@ def main(model_folder, model_type='smplx', ext='npz',
                          gender=gender, use_face_contour=use_face_contour,
                          ext=ext)
     # nxb added the following lines (Aug 18, 2020)
-    print(model)
     X,Y,Z=0,1,2
 
     #output_dir_fname='/home/nathan_bendich/Documents/code/gitCloned/smplx/examples/out_meshes/'  # in DropBox now.     -nxb;   August 14, 2020.
@@ -504,10 +477,6 @@ def main(model_folder, model_type='smplx', ext='npz',
       TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES *\
       (TIM_SELF_REPORTED_HEIGHT_INCHES / TIM_PIXEL_HEIGHT_INCHES) # how many "real" inches are in 1 pixel inch   
       #(on my laptop in `feh`, when I hit "down" 3 times, with Tim's Photo
-    print("====================================================================")
-    print("  TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN :"  )  
-    print(   TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN     )
-    print("====================================================================")
     # The CALF and
     #   lowerLeg"height"  are more important than the rest of the lowerLeg.       -nxb, August 17, 2020
 
@@ -596,8 +565,6 @@ def main(model_folder, model_type='smplx', ext='npz',
 
     lowerLegHeightMagnitude = resizedLeftLowerLegVerts[:,Y].max() - resizedLeftLowerLegVerts[:,Y].min()
     upperLegHeightMagnitude = resizedLeftUpperLegVerts[:,Y].max() - resizedLeftUpperLegVerts[:,Y].min()    # TODO:  remove the "min()" call (min() should always be 0)        -nxb;   August, 18, 2020
-    #print(lowerLegHeightMagnitude)
-    #print(upperLegHeightMagnitude)
     LOWER_LEG_____BOUNDARY_SKIN_END_CONST = lowerLegHeightMagnitude / 10  # TODO: fiddle with this LOWER_...CONST.
     UPPER_LEG_____BOUNDARY_SKIN_END_CONST = upperLegHeightMagnitude / 10  # TODO: fiddle with this UPPER_...CONST.
     lowersTopBoundarySkinIdxs = np.where(
@@ -606,35 +573,35 @@ def main(model_folder, model_type='smplx', ext='npz',
         lowerLegEndsY - LOWER_LEG_____BOUNDARY_SKIN_END_CONST #     (I have to do math in this line    because this is pre-translation-up-and-down)      -nxb, August 18, 2020
       ))[0]    # TODO:    rename this awkwardly named "LOWER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
     pn(2)
-    print('='*99)
-    print("lowersTopBoundarySkinIdxs: ")
-    print(lowersTopBoundarySkinIdxs)
-    print('='*99)
+    print('='*99) # comment written     August 18, 2020
+    print("lowersTopBoundarySkinIdxs: ") # comment written     August 18, 2020
+    print(lowersTopBoundarySkinIdxs) # comment written     August 18, 2020
+    print('='*99) # comment written     August 18, 2020
     pn(2)
     uppersBottomBoundarySkinIdxs = np.where(
       np.less(
         resizedLeftUpperLegVerts[:,Y],
         UPPER_LEG_____BOUNDARY_SKIN_END_CONST))[0]    # TODO:    rename this awkwardly named "UPPER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
     pn(2)
-    print('='*99)
-    print("uppersBottomBoundarySkinIdxs: ")
-    print(uppersBottomBoundarySkinIdxs)
-    print('='*99)
+    print('='*99) # comment written     August 18, 2020
+    print("uppersBottomBoundarySkinIdxs: ")# comment written     August 18, 2020
+    print(uppersBottomBoundarySkinIdxs)# comment written     August 18, 2020
+    print('='*99)# comment written     August 18, 2020
     pn(2)
 
     pe(77)
-    print("resizedLeftLowerLegVerts.shape :")
-    print(resizedLeftLowerLegVerts.shape)
-    print("resizedLeftUpperLegVerts.shape :")
-    print(resizedLeftUpperLegVerts.shape)
+    print("resizedLeftLowerLegVerts.shape :")# comment written     August 18, 2020
+    print(resizedLeftLowerLegVerts.shape)# comment written     August 18, 2020
+    print("resizedLeftUpperLegVerts.shape :")# comment written     August 18, 2020
+    print(resizedLeftUpperLegVerts.shape)# comment written     August 18, 2020
     pe(77)
     lowersTopBoundarySkin     = resizedLeftLowerLegVerts[lowersTopBoundarySkinIdxs    ]     
     uppersBottomBoundarySkin  = resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs ]   
     # OR,  more technically, resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs, : ]     -August 18, 2020
     pn(2)
     pe(77)
-    print(lowersTopBoundarySkin.shape)
-    print(uppersBottomBoundarySkin.shape)
+    print(lowersTopBoundarySkin.shape)# comment written     August 18, 2020
+    print(uppersBottomBoundarySkin.shape)# comment written     August 18, 2020
     pe(77)
     pn(2)
     lowersCentroid = lowersTopBoundarySkin.mean(axis=0)
@@ -645,8 +612,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     pe(77)
     print(lowersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
     print(uppersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
-    print(lowersCentroid.shape)
-    print(uppersCentroid.shape)
+    print(lowersCentroid.shape)# comment written     August 18, 2020
+    print(uppersCentroid.shape)# comment written     August 18, 2020
     pe(77)
     pn(2)
 
@@ -704,7 +671,7 @@ def main(model_folder, model_type='smplx', ext='npz',
     #print('betas =', betas)              # betas = tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])
     #print('betas.shape =', betas.shape)  # torch.Size([1,10])
     print('Vertices shape =', vertices.shape) # (10475,3)
-    print('Vertices type =', type(vertices)  ) # "numpy.ndarray" ;   I'm like 90% sure)    
+    #print('Vertices type =', type(vertices)  ) # "numpy.ndarray" ;   I'm like 90% sure)    
     timestamp= datetime.datetime.now().strftime('%Y_%m_%d____%H:%M_%p__')
 
     #===================================================================================================
@@ -773,8 +740,11 @@ def main(model_folder, model_type='smplx', ext='npz',
         #================================================================================
         # Added by NXB, August 13, 2020 :
         export_obj = trimesh.exchange.obj.export_obj(tri_mesh, include_texture=True)
+        pn(3)
         print("="*99)
         print("about to write mesh as .obj file")
+        pe(99)
+        pn(3)
 
         # Save in backupdir with timestamps:
         with open('{}out_{}.obj'.format(output_dir_fname, timestamp), 'w') as fp:     trimesh.util.write_encoded(fp, export_obj)

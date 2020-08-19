@@ -303,9 +303,9 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
 
   # Scale up again:
-  leftLowerLegVertsCenteredOnOrigin[:,X] *=customerEstimatedMaxLowerLegWidthInches_X
-  leftLowerLegVertsCenteredOnOrigin[:,Y] *=customerEstimatedLowerLegLenInches
-  leftLowerLegVertsCenteredOnOrigin[:,Z] *=customerEstimatedMaxLowerLegDepthInches_Z
+  leftLowerLegVertsCenteredOnOrigin[:,X] *= customerEstimatedMaxLowerLegWidthInches_X
+  leftLowerLegVertsCenteredOnOrigin[:,Y] *= customerEstimatedLowerLegLenInches
+  leftLowerLegVertsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z
   #=======================================================================================================================================================
   # Here the lowerLeg is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
   #   -nxb, August 17, 2020
@@ -402,7 +402,43 @@ def leftLowerLegIndices(vs):
   #return leftLowerLeg
 #==================================================
 
+#==================================================
+def makeLeftLeg(TODO_TODO_TODO_TODO_TODO_____params):
+  '''
+    Given the lowerLeg and upperLeg
 
+    1.  Translates them on top of each other
+    2.  Resizes to the appropriate extent
+  '''
+  # PARAMS:   NOTE TODO:
+#def makeLeftLeg(... , ... , ...    ...(nParams is variable)  ):
+  # TODO:  uncomment the "`raise Exception(...)  `" line
+  #raise Exception( "fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")    # TODO:    re-raise this exception
+    # TODO:    finish this function
+    # TODO:    finish this function
+    # TODO:    finish this function
+    # TODO:    finish this function
+    # TODO:    finish this function
+
+  print("fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")
+
+  X,Y,Z=0,1,2
+  """
+  leftUpperLegVerts
+  leftLowerLegVerts
+  #leftLowerLegVerts
+  leftLegIdxes = np.concatenate(leftLowerLegIdxes, leftUpperLegIdxes) # maybe I have to type "`idxes[0]`"    to dereference the np.ndarray from the list
+
+  resizedLeftUpperLegVerts[:,Y] += resizedLeftLowerLegVerts[:,Y].max() # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )
+  resizedLeftUpperLegVerts[:,Y] += resizedLeftLowerLegVerts[:,Y].max() # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )
+  # TODO:   more shit;   more shit from the main()    into this "boyo"
+  # TODO:   more shit;   more shit from the main()    into this "boyo"
+  # TODO:   more shit;   more shit from the main()    into this "boyo"
+  # TODO:   more shit;   more shit from the main()    into this "boyo"
+  # TODO:   more shit;   more shit from the main()    into this "boyo"
+  """
+  return
+#==================================================
 
 
 #==================================================
@@ -532,17 +568,110 @@ def main(model_folder, model_type='smplx', ext='npz',
     #====================================================================
     #                            start
     #====================================================================
-    resizedLeftUpperLegVerts[:,Y] += resizedLeftLowerLegVerts[:,Y].max() # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )
+
+    #=========================================================
+    #   def makeLeftLeg(... , ... ,    ... (moreParams)   ):
+    #=========================================================
+
+
+    #====================================================
+    # Move the    lowerLeg back and forth and     
+    #                      left and right until it's directly 
+    #   under the upperLeg
+    #
+    #   -nxb, August 18, 2020
+    #====================================================
+    # (I begun a more technical way of saying it, 
+    #   but I figure the code is the technically arcane, hard-to-understand version anyway.  
+    # In case you want to see my "failures," here's the more "arcane" diction-style comment:    
+    #   "Calculate the "lateral" shift to align the vertices:"      -nxb, August 18, 2020
+    #====================================================
+
+
+    lowerLegEndsY = resizedLeftLowerLegVerts[:,Y].max()    # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )         
+    # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
+    # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
+    # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
+
+
+    lowerLegHeightMagnitude = resizedLeftLowerLegVerts[:,Y].max() - resizedLeftLowerLegVerts[:,Y].min()
+    upperLegHeightMagnitude = resizedLeftUpperLegVerts[:,Y].max() - resizedLeftUpperLegVerts[:,Y].min()    # TODO:  remove the "min()" call (min() should always be 0)        -nxb;   August, 18, 2020
+    #print(lowerLegHeightMagnitude)
+    #print(upperLegHeightMagnitude)
+    LOWER_LEG_____BOUNDARY_SKIN_END_CONST = lowerLegHeightMagnitude / 10  # TODO: fiddle with this LOWER_...CONST.
+    UPPER_LEG_____BOUNDARY_SKIN_END_CONST = upperLegHeightMagnitude / 10  # TODO: fiddle with this UPPER_...CONST.
+    lowersTopBoundarySkinIdxs = np.where(
+      np.greater(
+        resizedLeftLowerLegVerts[:,Y],
+        lowerLegEndsY - LOWER_LEG_____BOUNDARY_SKIN_END_CONST #     (I have to do math in this line    because this is pre-translation-up-and-down)      -nxb, August 18, 2020
+      ))[0]    # TODO:    rename this awkwardly named "LOWER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
+    pn(2)
+    print('='*99)
+    print("lowersTopBoundarySkinIdxs: ")
+    print(lowersTopBoundarySkinIdxs)
+    print('='*99)
+    pn(2)
+    uppersBottomBoundarySkinIdxs = np.where(
+      np.less(
+        resizedLeftUpperLegVerts[:,Y],
+        UPPER_LEG_____BOUNDARY_SKIN_END_CONST))[0]    # TODO:    rename this awkwardly named "UPPER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
+    pn(2)
+    print('='*99)
+    print("uppersBottomBoundarySkinIdxs: ")
+    print(uppersBottomBoundarySkinIdxs)
+    print('='*99)
+    pn(2)
+
+    pe(77)
+    print("resizedLeftLowerLegVerts.shape :")
+    print(resizedLeftLowerLegVerts.shape)
+    print("resizedLeftUpperLegVerts.shape :")
+    print(resizedLeftUpperLegVerts.shape)
+    pe(77)
+    lowersTopBoundarySkin     = resizedLeftLowerLegVerts[lowersTopBoundarySkinIdxs    ]     
+    uppersBottomBoundarySkin  = resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs ]   
+    # OR,  more technically, resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs, : ]     -August 18, 2020
+    pn(2)
+    pe(77)
+    print(lowersTopBoundarySkin.shape)
+    print(uppersBottomBoundarySkin.shape)
+    pe(77)
+    pn(2)
+    lowersCentroid = lowersTopBoundarySkin.mean(axis=0)
+    uppersCentroid = uppersBottomBoundarySkin.mean(axis=0)
+    desiredX_Translation  = uppersCentroid
+    desiredZ_Translation  = uppersCentroid
+    pn(2)
+    pe(77)
+    print(lowersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
+    print(uppersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
+    print(lowersCentroid.shape)
+    print(uppersCentroid.shape)
+    pe(77)
+    pn(2)
+
+    # "Move the thigh above the calves"  :
+    #   Using more math jargon,   "Translate the upperLeg s.t. the 'leftLeg is whole'  "  
+    translationUpperToLowerX  = lowersCentroid[X] - uppersCentroid[X]
+    translationUpperToLowerY  = lowerLegEndsY
+    translationUpperToLowerZ  = lowersCentroid[Z] - uppersCentroid[Z]
+
+    resizedLeftUpperLegVerts[:,X] += translationUpperToLowerX
+    resizedLeftUpperLegVerts[:,Y] += translationUpperToLowerY
+    resizedLeftUpperLegVerts[:,Z] += translationUpperToLowerZ
+
     vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
     vertsWithResizedLeftLeg = deepcopy(vertsWithResizedLeftUpperLeg)
     vertsWithResizedLeftLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
     vertsWithResizedLeftLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
-
     #====================================================================
-    #                             end
+    #                                End
     #====================================================================
     # TODO:  put this code into func "makeLeftLeg(... , ... , ... , ...)"
     #====================================================================
+
+    TODO_TODO_TODO_params={}
+    makeLeftLeg(TODO_TODO_TODO_params)
 
 
     # This stub/function header was written on August 17, 2020:       -nxb
@@ -557,7 +686,11 @@ def main(model_folder, model_type='smplx', ext='npz',
 
 
 
-    '''
+    """         DON'T DELETE!             this information is always always always pretty useful.
+                DON'T DELETE!             this information is always always always pretty useful.
+                DON'T DELETE!             this information is always always always pretty useful.
+                DON'T DELETE!             this information is always always always pretty useful.
+                DON'T DELETE!             this information is always always always pretty useful.
       maxesAndMins:           NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
         {'xMax': 0.8656285,
          'xMin': -0.8656085,
@@ -565,7 +698,7 @@ def main(model_folder, model_type='smplx', ext='npz',
          'yMin': -1.3589503,
          'zMax': 0.15359592,
          'zMin': -0.1527159}
-    '''
+    """
     joints = output.joints.detach().cpu().numpy().squeeze()
 
     #print('betas =', betas)              # betas = tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])

@@ -112,3 +112,5 @@ venv.bak/
 
 # NXB manually-added gitignore shit:      (August 14, 2020)
 *.obj
+examples/nxb_demo_DiffWindowLowerLeg.py
+examples/nxb_demo_DiffWindowUpperLeg.py

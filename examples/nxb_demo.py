@@ -295,7 +295,12 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   # Set yMin to 0:        (see docstring for more details)
   finalResizedLeftLowerLegVertsTranslatedBack[:,Y] -=  finalResizedLeftLowerLegVertsTranslatedBack[:,Y].min()
 
-  return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, {} # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "makeLeftLeg(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
+  leftLowerLegXYZScaleParams = {  # TODO:  copy all this for UpperLeg.   (-nxb; August 19, 2020)
+    'X' : customerEstimatedMaxLowerLegWidthInches_X / currHeightX,
+    'Y' : customerEstimatedLowerLegLenInches        / currHeightY,
+    'Z' : customerEstimatedMaxLowerLegDepthInches_Z / currHeightZ,
+  }
+  return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, leftLowerLegXYZScaleParams # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "makeLeftLeg(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
 #================================================== end function def of   "getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):    # we don't have this customerEstimatedLowerLegLenInches, ==================================================
 
 

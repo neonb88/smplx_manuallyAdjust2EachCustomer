@@ -168,6 +168,285 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
 
 
 #==================================================
+def getResizedLeftSMPLX_LowerLegPrettierDraft2Aug24( 
+  # I think I'll rewrite some of this in main() instead.  
+  # 3 functions: 1. getResizedFuncCall(ankle-to-calf), 2. getResizedFuncCall(calf-to-knee), and 3. getResizedFuncCall(knee-up-to-bottom-of-butt)      seems like its fewer layer of encapsulation while also being more specific and still easy to understand     (makes more sense to me as a code reader and editor [AKA maintainer] )    than just 
+  # 2 functions (1. getRes...Lower(...), and 2. getRes...Upper(...)
+    verts,
+    customerEstimatedLowerLegLenInches,
+    customerEstimatedHeightInches,
+    prevBodyPartsXStretchingSlashScaling,
+    prevBodyPartsZStretchingSlashScaling,
+    customerEstimatedMaxLowerLegWidthInches_X, 
+    customerEstimatedMaxLowerLegDepthInches_Z)
+  '''
+    Prettier result, not necessarily prettier code.
+      -nxb, August 24, 2020
+  '''
+  X,Y,Z=0,1,2
+
+  idxOfSMPLXsLeftCalfWithGreatestCircum = leftCalfIdx             (modelType = 'SMPLX')
+  idxOfTopOfSMPLXs_LeftLowerLeg         = topOfLeftLowerLegIdx    (modelType = 'SMPLX')
+  idxOfBottomOfSMPLXs_LeftLowerLeg      = bottomOfLeftLowerLegIdx (modelType = 'SMPLX')
+  raise Exception ("Fill in the above leftCalfIdx, topOfLeftLowerLegIdx, and bottomOfLeftLowerLegIdx code, Nathan.")
+
+  topsYHeight     = verts[idxOfTopOfSMPLXs_LeftLowerLeg][Y]
+  midsYHeight     = verts[idxOfMiddleOfSMPLXs_LeftCalf][Y]
+  bottomsYHeight  = verts[idxOfBottomOfSMPLXs_LeftLowerLeg][Y]
+
+  # reuse this code in a function "def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthTop, xWidthBot, zDepthTop, zDepthBot)"
+  upperCalfsYHeight = topsYHeight - midsYHeight
+
+  # knee down:
+  scaleLegLinearlyWithYHeight()
+  # knee up:
+  scaleLegLinearlyWithYHeight()
+
+  return LeftLowerLegVerts
+#==================================================
+
+
+
+
+
+#==================================================
+def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthTop, xWidthBot, zDepthTop, zDepthBot):
+  # TODO:  make this fast ("performant").   (vectorize it)        -nxb; August 24, 2020 at    5:15 P.M.
+
+  # TODO:  find the bug(s) in this function    and/or approach.   -nxb;   Aug 24, 3:39 P.M.
+  # TODO: rename variables so it's clear to future-NXB that xWidthBot, xWidthTop, zDepthBot, and zDepthTop are REAL_CUSTOMER_MEASURES_IN_INCHES.
+  '''
+    @Explanation:
+
+    This function assumes a body part like the lower leg
+      scales (roughly) in both the width (x) and depth (z) directions   LINEARLY with height
+      (as of August 24, 2020)
+    A simple example should illustrate better than my long, overly academic, awkward words:
+      1.  Say we resize Nathan's human thigh to fit precisely in a cube of 10, 10, 10 units.
+        Nathan's thigh is "verts"
+      2.  Say Nathan's thigh's real "width" is 15 inches right near the bottom of the butt.  and
+      2a.   His thigh is 18 inches "deep."
+        (I've made Nathan quite thicc in this example.  Approaching the size of "The Hulk")
+      3.  Say Nathan's leg's real "width" is only 4 inches at the "height" of his knees, in this example      (xWidthBot and yBot)
+      3a.   and his leg's real "depth" is 5 inches at the "height" of his knees.                              (zDepthBot and yBot)
+
+      4.  The **__OUTPUT__** return value halfway between the top of the thigh and the "bottom of the thigh" (beginning of the knee)     should be 
+        a.   9.5 inches wide    (15+4)/2
+        b.  11.5 inches deep    (18+5)/2
+        c.  In other words, a point (circumference) HALFway between knee and bottom-of-butt HEIGHT-wise    should have HALF the WIDTH and HALF the DEPTH.
+    Let me repeat that last point again so you actually think about it.  Please go back and reread so you understand.
+    "In summation, a point (circumference) HALFway between knee and bottom-of-butt HEIGHT-wise    should have HALF the WIDTH and HALF the DEPTH."
+
+      (as of August 24, 2020)
+
+
+    @author: Nathan X Bendich (nxb)
+    @precondition:     verts y ranges between yTop and yBot.
+    @precondition:     the leg parts are already y-scaled to the correct height.  
+      I think the y-scaling is easier than the x and z scaling for legs?      -nxb at     4:32 P.M. on    August 24, 2020
+
+    (assert verts[:,Y].max() == yTop       and    verts[:,Y].min() == yBot
+  '''
+  # TODO
+  # TODO:   make sure "`np.isclose()`" has a high enough tolerance.     (ie. the assertion shouldn't fail when everything is fine)     -nxb, August 24, 2020
+  # TODO
+  assert np.isclose(verts[:,Y].max(), yTop)       and    np.isclose(verts[:,Y].min(), yBot)
+  # TODO
+  # TODO:   make sure "`np.isclose()`" has a high enough tolerance.     (ie. the assertion shouldn't fail when everything is fine)     -nxb, August 24, 2020
+  # TODO
+
+  X,Y,Z=0,1,2
+  height = yTop-yBot
+  verts_ = deepcopy(verts) # b/c accessor, not mutator method.  -nxb, August 24, 2020
+  """ In other words, side effects and state are BAD;
+    Using "deepcopy" is more "functional" than mutating the original numpy.ndarray, which is    GOOD.  """
+
+  # along the height of the leg:
+  for yVal, i in enumerate(verts_[:,Y]):
+    currsHeight = yVal - yBot
+    height - currsHeight / height
+
+    #========================
+    #   x (width) scaling:   
+    #========================
+    m = slope = (xWidthTop - xWidthBot) / (yTop - yBot)  # it's kind of hard to understand this code.  See reasons in extended documentation below
+    b = yInterceptOnTheGraph = xWidthTop - (m*yTop)
+    xScaling = m*yVal + b
+    verts_[i,X] *= xScaling
+
+    #========================
+    #   z (depth) scaling:   
+    #========================
+    m = slope = (zDepthTop - zDepthBot) / (yTop - yBot)  # it's kind of hard to understand this code.  See reasons in extended documentation below
+    b = yInterceptOnTheGraph = zDepthTop - (m*yTop)
+    zScaling = m*yVal + b # again, not quite y = m*x+b.  See thorougher documentation after the function for reasoning -August 24, 2020. 
+    verts_[i,Z] *= zScaling
+
+  return verts_
+
+    #==========================================================================================
+    #==========================================================================================
+    #==========================================================================================
+    #==========================================================================================
+    #==========================================================================================
+
+    #==============================
+    # DOCUMENTATION for this code:
+    #==============================
+
+    #========================
+    #   x (width) scaling:   
+    #========================
+    # I drew out the "y = m*x + b"     that we learned in   algebra in   middle / high school and got the following:
+    #   -nxb, August 24, 2020
+
+    # "It's kind of hard to understand this code because when I drew it on paper, I put "y" from the human body on the "x" axis on the page and "x" from the human body on the "y" axis on the page.  There's probably a simpler formulation of the problem that's easier to read and understand for the particular leg(s) scaling we're doing at 2:29 P.M. on August 24, 2020.  But as long as the code works, maybe it's just better to not edit (and subsequently break) anything.   -nxb, August 24, 2020
+    """ it's kind of hard to understand this code because when I drew it on paper, I put "y" from the human body on the "x" axis on the page and "x" from the human body on the "y" axis on the page.  There's probably a simpler formulation of the problem that's easier to read and understand for the particular leg(s) scaling we're doing at 2:29 P.M. on August 24, 2020.  But as long as the code works, maybe it's just better to not edit (and subsequently break) anything.   -nxb, August 24, 2020"""
+
+    #========================
+    #   z (depth) scaling:   
+    #========================
+    # I drew out the "y = m*x + b"     that we learned in   algebra in   middle / high school and got the following:
+    #   -nxb, August 24, 2020
+
+    #  It's kind of hard to understand this code because when I drew it on paper, I put "y" from the human body on the "x" axis on the page and "z" from the human body on the "y" axis on the page.  There's probably a simpler formulation of the problem that's easier to read and understand for the particular leg(s) scaling we're doing at 2:29 P.M. on August 24, 2020.  But as long as the code works, maybe it's just better to not edit (and subsequently break) anything.   -nxb, August 24, 2020
+
+    #zScaling = m*yVal + b    # the comment after <== this line was/is      '''
+    #backwards for the reasons    : " it's kind of hard to understand this code because when I drew it on paper, I put 'y' from the human body on the 'x' axis on the page and 'z' from the human body on the 'y' axis on the page.  There's probably a simpler formulation of the problem that's easier to read and understand for the particular leg(s) scaling we're doing at 2:29 P.M. on August 24, 2020.  But as long as the code works, maybe it's just better to not edit (and subsequently break) anything.   -nxb, August 24, 2020" 
+    #  '''
+    """ it's kind of hard to understand this code because when I drew it on paper, I put "y" from the human body on the "x" axis on the page and "z" from the human body on the "y" axis on the page.  There's probably a simpler formulation of the problem that's easier to read and understand for the particular leg(s) scaling we're doing at 2:29 P.M. on August 24, 2020.  But as long as the code works, maybe it's just better to not edit (and subsequently break) anything.   -nxb, August 24, 2020"""
+#==================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#==================================================
+def leftCalfIdx(modelType='SMPLX', ):
+  # TODO TODO TOOD:    finish this function.
+  if modelType.upper() == 'SMPLX' or  modelType.upper() == 'SMPL-X' :
+    raise Exception ("Please fill in this code, Nathan.  And more cmd line arguments.  \n HINT: use np.where() and np.greater() and np.less().  ")
+  return 
+  # (dumbshit)
+#==================================================
+#==================================================
+def topOfLeftLowerLegIdx(modelType='SMPLX', ):
+  # TODO TODO TOOD:    finish this function.
+  if modelType.upper() == 'SMPLX' or  modelType.upper() == 'SMPL-X' :
+    raise Exception ("Please fill in this code, Nathan.  And more cmd line arguments.  \n HINT: use np.where() and np.greater() and np.less().  ")
+  return 
+  # (dumbshit)
+#==================================================
+#==================================================
+def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
+  # TODO TODO TOOD:    finish this function.
+  if modelType.upper() == 'SMPLX' or  modelType.upper() == 'SMPL-X' :
+    raise Exception ("Please fill in this code, Nathan.  And more cmd line arguments.    \n HINT: use np.where() and np.greater() and np.less().  ")
+  return 
+  # (dumbshit)
+#==================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#==================================================
 # generalized version:      
 #     def getResizedLeftSMPLX_LowerLeg(
 #         vertices,
@@ -217,23 +496,51 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   #===================================================================================================
   #===================================================================================================
   #===================================================================================================
-  # TODO    TODO TODO TODO TODO
-  # NOTE NOTE NOTE NOTE NOTE
-  # NOTE NOTE NOTE NOTE NOTE
   # NOTE NOTE NOTE NOTE NOTE
   # NOTE: NOTE: NOTE: NOTE: NOTE:  slight assumption that causes a problem:  I can't really scale  the lowerLeg directly to yHeight==1, because the SMPL-X lowerLeg we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
   # NOTE NOTE NOTE NOTE NOTE
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+  #===================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  #======================================================
+  # TODO    TODO TODO TODO TODO
+  # NOTE NOTE NOTE NOTE NOTE
+  # NOTE NOTE NOTE NOTE NOTE
+  #======================================================
+  #              ACTUAL CODE starts here:
+  #======================================================
   # NOTE NOTE NOTE NOTE NOTE
   # NOTE NOTE NOTE NOTE NOTE
   # TODO TODO  TODO TODO TODO
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
+  #======================================================
+
+
+
+
 
     #===================================================================================================
     #   As of August 15, at 8:31 P.M.  EDT,   the function header was entitled:
@@ -245,28 +552,29 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   leftLowerLegIdxes = leftLowerLegIndices(vertices)
   leftLowerLegVerts = deepcopy(vertices[leftLowerLegIdxes, : ] )      # TODO:   do translation and scaling on this shit.   -nxb, August 14, 2020
 
+  #====================================================================================
   # Center:
-  #   (newLowerLegCentroid = (0,0,0)  )
+  #   (Center on the origin)
+  #     (newLowerLegCentroid = (0,0,0)  )
+  #====================================================================================
   origLowerLegCentroid = leftLowerLegVerts.mean(axis=0)  # DOWN=0
-  #====================================================================================
   # TODO: rename all these hellishly-long-variable names to simply "leftLowerLegVerts"  
-  #====================================================================================
   leftLowerLegVertsCenteredOnOrigin = leftLowerLegVerts - origLowerLegCentroid
 
+  #====================================================================================
   # Scale down:
   #   Normalize lowerLegLen to 1:
   #     NOTE:  (lowerLegLen is ALMOST exactly "`Y`," but not **__QUITE__**)
   #     NOTE: maintains proportions of lowerLeg;   **doesn't lose information**    -nxb; August 14, 2020
+  #====================================================================================
   currHeightX = leftLowerLegVertsCenteredOnOrigin[:,X].max() - leftLowerLegVertsCenteredOnOrigin[:,X].min()
   currHeightY = leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
   currHeightZ = leftLowerLegVertsCenteredOnOrigin[:,Z].max() - leftLowerLegVertsCenteredOnOrigin[:,Z].min()
   leftLowerLegVertsCenteredOnOrigin[:,X] /= currHeightX
   leftLowerLegVertsCenteredOnOrigin[:,Y] /= currHeightY
   leftLowerLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
-  #========================================================================================
-  # Here the lowerLeg is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
+  # Here the lowerLeg is weird-and-FAT-looking b/c its width is 1 while its height is also 1.     (sanity check)
   #                         -nxb, August 17, 2020
-  #========================================================================================
 
   #====================================================================================================================
   # NOTE
@@ -276,14 +584,19 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   #   In code, "T-Pose" translates to      ("` theta==np.zeros( 127*3 )`")
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
 
+  #====================================================================================
   # Scale up again:
-  leftLowerLegVertsCenteredOnOrigin[:,X] *= customerEstimatedMaxLowerLegWidthInches_X
+  #====================================================================================
+  #leftLowerLegVertsCenteredOnOrigin[:,X] *= customerEstimatedMaxLowerLegWidthInches_X    # old code as of 5 P.M. on August 24, 2020
   leftLowerLegVertsCenteredOnOrigin[:,Y] *= customerEstimatedLowerLegLenInches
-  leftLowerLegVertsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z
-  #=======================================================================================================================================================
+  #leftLowerLegVertsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z    # old code as of 5 P.M. on August 24, 2020
+
+  # Both x and z are encapsulated (abstracted) away in the following function "scaleLegLinearlyWithYHeight" :
+  leftLowerLegVertsCenteredOnOrigin = scaleLegLinearlyWithYHeight(leftLowerLegVertsCenteredOnOrigin,  moreParams) # TODO TODO TODO TODO TODO
+  #====================================================================================
   # Here the lowerLeg is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
   #   -nxb, August 17, 2020
-  #=======================================================================================================================================================
+  #====================================================================================
   #leftLowerLegVertsCenteredOnOriginScaledToRealLowerLegLenInches = leftLowerLegVertsCenteredOnOriginNormalizedTo1 * customerEstimatedLowerLegLenInches
   #leftLowerLegVertsCenteredOnOrigin *= customerEstimatedLowerLegLenInches
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
@@ -302,6 +615,55 @@ def getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, c
   }
   return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, leftLowerLegXYZScaleParams # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "makeLeftLeg(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
 #================================================== end function def of   "getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):    # we don't have this customerEstimatedLowerLegLenInches, ==================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -538,6 +900,10 @@ def main(model_folder, model_type='smplx', ext='npz',
 
 
     #====================================================================
+    # Translation code. comment written August 24, 2020
+    #====================================================================
+
+    #====================================================================
     # TODO:  put this code into func "makeLeftLeg(... , ... , ... , ...)"
     #====================================================================
     #                            start
@@ -562,6 +928,7 @@ def main(model_folder, model_type='smplx', ext='npz',
     #====================================================
 
 
+    # Translation code. comment written August 24, 2020
     lowerLegEndsY = resizedLeftLowerLegVerts[:,Y].max()    # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )         
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
@@ -600,6 +967,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     print("resizedLeftUpperLegVerts.shape :")# comment written     August 18, 2020
     print(resizedLeftUpperLegVerts.shape)# comment written     August 18, 2020
     pe(77)
+
+    # Translation code. comment written August 24, 2020
     lowersTopBoundarySkin     = resizedLeftLowerLegVerts[lowersTopBoundarySkinIdxs    ]     
     uppersBottomBoundarySkin  = resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs ]   
     # OR,  more technically, resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs, : ]     -August 18, 2020
@@ -613,6 +982,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     uppersCentroid = uppersBottomBoundarySkin.mean(axis=0)
     desiredX_Translation  = uppersCentroid
     desiredZ_Translation  = uppersCentroid
+
+    # Translation code. comment written August 24, 2020
     pn(2)
     pe(77)
     print(lowersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
@@ -713,8 +1084,11 @@ def main(model_folder, model_type='smplx', ext='npz',
         resizedTrimesh =  trimesh.Trimesh(vertsWithResizedLeftUpperLeg, model.faces,
                                    vertex_colors=vertex_colors) # nxb, Aug 13, 2020
         """
+
+        #"""
         resizedTrimesh =  trimesh.Trimesh(vertsWithResizedLeftLeg, model.faces,
                                    vertex_colors=vertex_colors) # nxb, Aug 13, 2020
+        #"""
         mesh = pyrender.Mesh.from_trimesh(resizedTrimesh)
 
         scene = pyrender.Scene()

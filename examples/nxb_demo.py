@@ -214,6 +214,47 @@ def getResizedLeftSMPLX_LowerLegPrettierDraft2Aug24(
 
 #==================================================
 def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches):
+  # TODO:  make this fast (AKA "performant").   (vectorize it)        -nxb; August 24, 2020 at    5:15 P.M.
+
+  # NOTE:   the code is fairly performant.   (about 5 secs.   O(5 seconds)   )       At least while I'm only scaling the LowerLeg, most of the time is spent on file-IO rather than in this method.     (see output from "cProfile" below ) :     
+
+
+
+#============================================================================================================
+  '''     Some output from the "cProfile" command       (sort by total time taken)
+=============================================================================================================
+          Some output from the "cProfile" command       (sort by total time taken)
+=============================================================================================================
+    "`p3 -m cProfile -s tottime examples/nxb_demo.py --model-folder /home/nathan_bendich/Downloads/SMPL-X_Models/models/ --plot-joints=True --gender="male" `"        -nxb, August 28, 2020
+=============================================================================================================
+ 
+
+
+
+
+
+
+
+
+==========================================================================
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+==========================================================================
+
+======================================================================================================
+     1336    0.596    0.000    0.596    0.000 {method 'read' of '_io.FileIO' objects}
+    91/88    0.558    0.006    0.562    0.006 {built-in method _imp.create_dynamic}
+      322    0.316    0.001    0.316    0.001 {method 'decompress' of 'zlib.Decompress' objects}
+     1336    0.209    0.000    0.209    0.000 {built-in method marshal.loads}
+     5603    0.201    0.000    0.201    0.000 {built-in method posix.stat}
+      396    0.157    0.000    0.157    0.000 {method 'read' of '_io.BufferedReader' objects}
+     2292    0.154    0.000    0.154    0.000 {method 'format' of 'str' objects}
+  286/207    0.147    0.001    0.181    0.001 {built-in method numpy.core._multiarray_umath.implement_array_function}
+     1336    0.115    0.000    0.711    0.001 <frozen importlib._bootstrap_external>:830(get_data)
+     1081    0.114    0.000    0.114    0.000 {built-in method builtins.compile}
+2725/2666    0.113    0.000    0.289    0.000 {built-in method builtins.__build_class__}
+======================================================================================================
+
+  '''
 
   # TODO:  make this fast (AKA "performant").   (vectorize it)        -nxb; August 24, 2020 at    5:15 P.M.
 
@@ -249,13 +290,13 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
 
       (as of August 24, 2020)
 
-    @param verts
-    @param yTop 
-    @param yBot
-    @param xWidthAtTopYHeight_RealCustomerInches
-    @param xWidthAtBotYHeight_RealCustomerInches
-    @param zDepthAtTopYHeight_RealCustomerInches
-    @param zDepthAtBotYHeight_RealCustomerInches
+    @param verts  np.ndarray of shape (N, 3)
+    @param yTop   value using CURRENT SCALE'S max and min of the variable 'verts'       (`verts_[:,Y].max()`)
+    @param yBot   value using CURRENT SCALE'S min and min of the variable 'verts'       (`verts_[:,Y].min()`)
+    @param xWidthAtTopYHeight_RealCustomerInches    real customers' measurements in inches
+    @param xWidthAtBotYHeight_RealCustomerInches    real customers' measurements in inches
+    @param zDepthAtTopYHeight_RealCustomerInches    real customers' measurements in inches
+    @param zDepthAtBotYHeight_RealCustomerInches    real customers' measurements in inches
 
     @author: Nathan X Bendich (nxb)
     @precondition:     verts y ranges between yTop and yBot.
@@ -288,7 +329,7 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
   #=======================================
   # along the height of the leg:
   #=======================================
-  for yVal, i in enumerate(verts_[:,Y]):
+  for i,yVal in enumerate(verts_[:,Y]):
   #=======================================
 
     #  NOTE: The correct, well-thought-through lines are below.   -nxb, August 27, 2020
@@ -299,9 +340,30 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
     #========================
     #   x (width) scaling:   
     #========================
-    m = slope = (xWidthAtTopYHeight_RealCustomerInches - xWidthAtBotYHeight_RealCustomerInches) / (yTop - yBot)  # it's kind of hard to understand this code.  See reasons in extended documentation below
+    m = slope = (xWidthAtTopYHeight_RealCustomerInches - xWidthAtBotYHeight_RealCustomerInches) / (yTop - yBot)
+    # it's kind of hard to understand this code.  See reasons in extended documentation below   (search for "DOCUMENTATION for this code" as of August 28, 2020)
     b = yInterceptOnTheGraph = xWidthAtTopYHeight_RealCustomerInches - (m*yTop)
     xScaling = m*yVal + b
+    pn(2)
+    pe(99)
+    print("m: ")
+    print(m)
+    pe(99)
+    pn(2)
+    """
+    pn(2)
+    pe(99)
+    print("type(xScaling): ")
+    print(type(xScaling) )
+    print("i: ")
+    print(i)
+    print("X: ")
+    print(X)
+    print("verts_[i,X].shape: ")
+    print(verts_[i,X].shape)
+    pe(99)
+    pn(2)
+    """
     verts_[i,X] *= xScaling
 
     #========================
@@ -311,11 +373,19 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
     b = yInterceptOnTheGraph = zDepthAtTopYHeight_RealCustomerInches - (m*yTop)
     zScaling = m*yVal + b # again, not quite y = m*x+b.  See thorougher documentation after the function for reasoning -August 24, 2020. 
     verts_[i,Z] *= zScaling
+    pn(1)
+    pe(99)
+    print(' '*30 + "xScaling:")
+    print(' '*33 + str(xScaling) )    # why are these both 5.0?     -nxb, August 28, at 1:53 P.M.
+    print(' '*30 + "zScaling:")
+    print(' '*33 + str(zScaling) )    # why are these both 5.0?     -nxb, August 28, at 1:53 P.M.
+    pe(99)
+    pn(1)
   #============================================
-  #end "for yVal, i in enumerate(verts_[:,Y]):"
+  #end "for i, yVal in enumerate(verts_[:,Y]):"
   #============================================
 
-  return verts_
+  return verts_  # 90% sure this is a deepcopy so this isn't where the bug is   -nxb, August 28, 2020      at 1:31 P.M.
 
     #==========================================================================================
     #==========================================================================================
@@ -492,6 +562,7 @@ def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
 #       # we don't have this variable "`customerEstimatedLowerLegLenInches`"  , 
 #==================================================
 def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
+  # NOTE:   even with "`pyrender.show()`" ,   this code is fairly performant.   (about 5 secs.   O(5 seconds)   )       At least while I'm only scaling the LowerLeg, most of the time is spent on file-IO rather than in this method.
   '''
     This lowerLeg function SHOULD do the following:                  (August 18, 2020)
       (This docstring was written on August 18, 2020)
@@ -593,6 +664,26 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   origLowerLegCentroid = leftLowerLegVerts.mean(axis=0)  # DOWN=0
   # TODO: rename all these hellishly-long-variable names to simply "leftLowerLegVerts"  
   leftLowerLegVertsCenteredOnOrigin = leftLowerLegVerts - origLowerLegCentroid
+  jointsCenteredOnOrigin = joints - origLowerLegCentroid
+  '''
+  pe(99)
+  print("leftLowerLegVerts.shape: ")
+  print(leftLowerLegVerts.shape)
+  print("joints.shape")
+  print(joints.shape)
+  print("joints[:3]:")
+  print(joints[:3])
+  print("jointsCenteredOnOrigin[:3]:")
+  print(jointsCenteredOnOrigin[:3])
+  print("origLowerLegCentroid")
+  print(origLowerLegCentroid)
+  pe(99)
+  print("jointsCenteredOnOrigin.shape")
+  print(jointsCenteredOnOrigin.shape)
+  print("origLowerLegCentroid.shape")
+  print(origLowerLegCentroid.shape)
+  pe(99)
+  '''
 
   #====================================================================================
   # Scale down:
@@ -606,6 +697,10 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   leftLowerLegVertsCenteredOnOrigin[:,X] /= currHeightX
   leftLowerLegVertsCenteredOnOrigin[:,Y] /= currHeightY
   leftLowerLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
+
+  jointsCenteredOnOrigin[:,X] /= currHeightX
+  jointsCenteredOnOrigin[:,Y] /= currHeightY
+  jointsCenteredOnOrigin[:,Z] /= currHeightZ
   # Here the lowerLeg is weird-and-FAT-looking b/c its width is 1 while its height is also 1.     (sanity check)
   #                         -nxb, August 17, 2020
 
@@ -623,8 +718,13 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   #leftLowerLegVertsCenteredOnOrigin[:,X] *= customerEstimatedMaxLowerLegWidthInches_X    # old code as of 5 P.M. on August 24, 2020
   leftLowerLegVertsCenteredOnOrigin[:,Y] *= customerEstimatedLowerLegLenInches
   #leftLowerLegVertsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z    # old code as of 5 P.M. on August 24, 2020
+  # NOTE:   Both x and z are encapsulated (abstracted) away in the following function "scaleLegLinearlyWithYHeight" :
+  #     THAT'S why I commented the "old code" out
 
-  # Both x and z are encapsulated (abstracted) away in the following function "scaleLegLinearlyWithYHeight" :
+  # Also scale up 'joints' :
+  jointsCenteredOnOrigin[:,X] *= customerEstimatedMaxLowerLegWidthInches_X
+  jointsCenteredOnOrigin[:,Y] *= customerEstimatedLowerLegLenInches
+  jointsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z
 
   #===================================================================================================
   #===================================================================================================
@@ -643,64 +743,78 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   #===================================================================================================
 
   #===================================================================================================
-  def customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS, binaryMask):
+  def customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+    # TODO:  "Calf" ==> "Knee"      -nxb, 2:34 P.M. EDT on August 28, 2020                  
+
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    CONST = 5 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+    CONST = 5.0 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
     return CONST
-  TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS, binaryMask) # TODO:
+  NXBsRealCalfXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )     # FIXME:   this is actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   TimsRealCalfXWidthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   #===================================================================================================
 
   #===================================================================================================
-  def customersCalfZDepthInches(customerImgFname="timsSideView90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS, binaryMask):
+  def customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
     CONST = 5 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
     return CONST
-  TimsRealCalfZDepthInches  =  customersCalfZDepthInches(customerImgFname, OpenPoseKPS, binaryMask)
+  TimsRealCalfZDepthInches  =  customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   TimsRealCalfZDepthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   #===================================================================================================
 
   #===================================================================================================
-  def customersAnkleXWidthInches(customerImgFname, OpenPoseKPS, binaryMask):
-    # TODO: fill in.  -nxb; August 27, 2020
-    CONST = 5 # TODO: fill in.  -nxb; August 27, 2020
-    # TODO: fill in.  -nxb; August 27, 2020
-    return CONST
-  TimsRealAnkleXWidthInches  =  customersAnkleXWidthInches(customerImgFname, OpenPoseKPS, binaryMask)
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  TimsRealAnkleXWidthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  #===================================================================================================
+  def customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+    NXBs_REAL_ANKLE_X_WIDTH_IN_INCHES = 2.5
+    return NXBs_REAL_ANKLE_X_WIDTH_IN_INCHES
+  NXBsRealAnkleXWidthInches = TimsRealAnkleXWidthInches = customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
+  #======================================================================================================
+  # FIXME: ======================================================================================= FIXME
+  #TimsRealAnkleXWidthInches  =  5  # FIXME:     calculate Tim's from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+  # FIXME: ======================================================================================= FIXME
+  #======================================================================================================
 
   #===================================================================================================
-  def customersAnkleZDepthInches(customerImgFname, OpenPoseKPS, binaryMask):
-    # TODO: fill in.  -nxb; August 27, 2020
-    CONST = 5 # TODO: fill in.  -nxb; August 27, 2020
-    # TODO: fill in.  -nxb; August 27, 2020
-    return CONST
-  TimsRealAnkleZDepthInches  =  customersAnkleZDepthInches(customerImgFname, OpenPoseKPS, binaryMask)
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  TimsRealAnkleZDepthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  #===================================================================================================
+  #def customersAnkleZDepthInches(customerImgFname, OpenPoseKPS, binaryMask):
+  def customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+    NXBs_REAL_ANKLE_Z_DEPTH_IN_INCHES = 3.5
+    return NXBs_REAL_ANKLE_Z_DEPTH_IN_INCHES
+  NXBsRealAnkleZDepthInches = TimsRealAnkleZDepthInches = customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
+
+  #======================================================================================================
+  # FIXME: ======================================================================================= FIXME
+  #TimsRealAnkleZDepthInches  =  5  # FIXME:     calculate Tim's from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+  # FIXME: ======================================================================================= FIXME
+  #======================================================================================================
 
 
 
 
 
-  yValueAtCalfHeightWithCalfNormalizedTo1   = -0.3
-  yValueAtAnkleHeightWithCalfNormalizedTo1  = -0.25
+  # TODO: change this from "calf" to "knee" ?   Briefly (ie. today)    requires less work.     -nxb; August 28, 2020
+  yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = -0.3      # where the Knee  is on the SMPL-X model      (y-dimension is foot to scalp)      (these were hard-coded before August 27, 2020 -nxb)
+  yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1  = -0.25     # where the Ankle is on the SMPL-X model      (y-dimension is foot to scalp)      (these were hard-coded before August 27, 2020 -nxb)
+  LEFT_KNEE   = 4 # TODO: double-check this indexing?  (1-based vs. 0-based)
+  LEFT_ANKLE  = 7   # see   "`/home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/smplx_manuallyAdjust2EachCustomer/smplx/joint_names.py`"  for details.
+  yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = jointsCenteredOnOrigin[LEFT_KNEE  , Y]    #  8.715
+  yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1  = jointsCenteredOnOrigin[LEFT_ANKLE , Y]    # -9.715
+  pn(2)
+  pe(len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:" )  +4   )
+  print("  yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1 : " )    #  8.715
+  print(yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1 )
+  print("  yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1: ")     # -9.393
+  print(yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1)
+  pe(len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:" )  +4   )
+  pn(2)
 
-  #yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches  = 1, 2, 3, 4, 5, 6     # TODO: fill in a few values that test whether the code "works" .    -nxb at 9:02 P.M. on     August 27, 2020
   leftLegAnkleToCalfCenteredOnOrigin =scaleLegLinearlyWithYHeight(
     # TODO:  work backward from this function call.   (joints['ankleHeightY'] and/or vertices['calf'] )     -nxb, August 27, 2020
-    leftLowerLegVertsCenteredOnOrigin, yValueAtCalfHeightWithCalfNormalizedTo1, yValueAnkleHeightWithCalfNormalizedTo1, TimsRealCalfZDepthInches, TimsRealAnkleZDepthInches)
+    leftLowerLegVertsCenteredOnOrigin, yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, TimsRealCalfXWidthInches, TimsRealAnkleXWidthInches, TimsRealCalfZDepthInches, TimsRealAnkleZDepthInches)   # FIXME:     there's a lot of crap in here that should be changed.     For instance,     -nxb on August 28, 2020      at 1:15 P.M. EDT
 
   """
   leftLowerLegVertsCenteredOnOrigin = scaleLegLinearlyWithYHeight(
@@ -1216,7 +1330,7 @@ def main(model_folder, model_type='smplx', ext='npz',
             joints_pcl = pyrender.Mesh.from_trimesh(sm, poses=tfs)
             scene.add(joints_pcl)
 
-        pyrender.Viewer(scene, use_raymond_lighting=True)
+        pyrender.Viewer(scene, use_raymond_lighting=True)  # NOTE: this line turns on/off the mesh popping up visually AKA "pltshow"  -nxb; August 28, at 11:52 A.M.
 
         #==============================================================================
         # After this line, it's (mostly) just the   
@@ -1257,7 +1371,7 @@ def main(model_folder, model_type='smplx', ext='npz',
             joints_pcl = pyrender.Mesh.from_trimesh(sm, poses=tfs)
             scene.add(joints_pcl)
 
-        pyrender.Viewer(scene, use_raymond_lighting=True)
+        #pyrender.Viewer(scene, use_raymond_lighting=True)  # NOTE: this line turns on/off the mesh popping up visually AKA "pltshow"  -nxb; August 28, at 11:52 A.M.
     elif plotting_module == 'matplotlib':
         from matplotlib import pyplot as plt
         from mpl_toolkits.mplot3d import Axes3D

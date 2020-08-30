@@ -1,3 +1,5 @@
+#TODO tomorrow (Sat, Aug 29, 2020):    Figure out why changing that variable with the ankle and knee heights (y)    doesn't actually change anything.
+
 '''
 {'xMax': 0.8656285,
  'xMin': -0.8656085,
@@ -746,10 +748,19 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   def customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
     # TODO:  "Calf" ==> "Knee"      -nxb, 2:34 P.M. EDT on August 28, 2020                  
 
+    
+    NXBs_REAL_KNEE_X_WIDTH_IN_INCHES = 4.125 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+    # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    # FIXME: rename(s)    Calf => knee
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    return NXBs_REAL_KNEE_X_WIDTH_IN_INCHES
+    #return CONST
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    CONST = 5.0 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    return CONST
+    # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
   NXBsRealCalfXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )     # FIXME:   this is actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   TimsRealCalfXWidthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
@@ -759,10 +770,23 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   #===================================================================================================
   def customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    CONST = 5 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+    
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
+    NXBs_REAL_KNEE_Z_DEPTH_IN_INCHES  = 4.75
+    return NXBs_REAL_KNEE_Z_DEPTH_IN_INCHES
+    # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
+    # FIXME: rename(s)
+    # FIXME: rename(s)
+    # FIXME: rename(s)    Calf => knee
+    # FIXME: rename(s)
+    # FIXME: rename(s)
     # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    return CONST
-  TimsRealCalfZDepthInches  =  customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
+  NXBsRealKneeZDepthInches  = TimsRealCalfZDepthInches=  customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   TimsRealCalfZDepthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
   # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020

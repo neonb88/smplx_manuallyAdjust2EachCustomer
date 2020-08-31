@@ -46,3 +46,22 @@ def rot_mat_to_euler(rot_mats):
     sy = torch.sqrt(rot_mats[:, 0, 0] * rot_mats[:, 0, 0] +
                     rot_mats[:, 1, 0] * rot_mats[:, 1, 0])
     return torch.atan2(-rot_mats[:, 2, 0], sy)
+
+#===================================================================================================
+#                           After this point, it's all NXB's code.
+#                                  -nxb, August 31, 2020
+#===================================================================================================
+def pyrenderShow(verts, faces):
+    import pyrender
+    import trimesh
+    import trimesh.exchange.obj #  Added by nxb on   August 13, 2020
+    vertex_colors = np.ones([verts.shape[0], 4]) * [0.3, 0.3, 0.3, 0.8] # gray
+    print("verts.shape:")
+    print(verts.shape)
+    print("faces.shape:")
+    print(faces.shape)
+    resizedTrimesh =  trimesh.Trimesh(verts, faces, vertex_colors=vertex_colors)
+    mesh = pyrender.Mesh.from_trimesh(resizedTrimesh)
+    scene = pyrender.Scene()
+    scene.add(mesh)
+    pyrender.Viewer(scene, use_raymond_lighting=True)

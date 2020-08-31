@@ -1318,7 +1318,7 @@ def main(model_folder, model_type='smplx', ext='npz',
         import pyrender
         import trimesh
         import trimesh.exchange.obj #  Added by nxb on   August 13, 2020
-        vertex_colors = np.ones([vertices.shape[0], 4]) * [0.3, 0.3, 0.3, 0.8]
+        vertex_colors = np.ones([vertices.shape[0], 4]) * [0.3, 0.3, 0.3, 0.8] # gray
         '''
           =============================================================================
           =============================================================================

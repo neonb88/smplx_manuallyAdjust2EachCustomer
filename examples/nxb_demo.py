@@ -42,6 +42,8 @@ from copy import deepcopy # Aug 14, 2020
 #from utils import pe, pn # Aug 18, 2020
 def pn(n=0):  print('\n'*n) # Aug 18, 2020
 def pe(n=89): print('='*n) # Aug 18, 2020
+
+from smplx.utils import filterVertsBtwn, pPrintVarNXB
 #==============================================
 
 
@@ -65,27 +67,6 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
           This is only the way it should be for bodyParts like the UpperLeg-lowerLeg boundary where the translation-before-smoothing is all along the **__Y__** axis.  For instance, for the foreArm-upperArm boundary in T-pose, the boundary should be along the **__X__** axis **__INSTEAD__**
       """
   '''
-  #raise Exception( "fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")
-  
-  '''
-    Do a lot of shit here   [insertCode]
-
-      (Coding all this shit might take 
-        ~4 hours, give-or-take-a-few-minutes) based on the 
-        "experiential data" for the other similar function   
-        "getResizedLeftSMPLX_LowerLeg()"
-  '''
-
-  # Idea:   have this spit out all the body parts with centroids at (0,0,0) ?    Then it's a different function's job to "put Humpty-Dumpty back together again"      -NXB, August 15, 2020
-
-  # NOTE:    generalize this to be "getResizedLeftSMPLX_BodyPartNameHere(..., otherParams, ...)"  ?
-  #   -nxb, August 15, 2020
-  '''
-    This function can be generalized to each body part?
-    Code reuse would prevent some headaches, make it so changing error-catching in just the general function would fix the error(s) for all the body parts rather than just the one, 
-
-    August 15, 2020
-  '''
 
 
   #===================================================================================================
@@ -95,16 +76,7 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
   # NOTE NOTE NOTE NOTE NOTE
   #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
 
-    #===================================================================================================
-    #   As of August 17, at 7:31 P.M.  EDT,   the function header was entitled:
-    #===================================================================================================
-    # function header: "getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, customerEstimatedHeightInches):" 
-    #===================================================================================================
   X,Y,Z=0,1,2
 
   leftUpperLegIdxes = leftUpperLegIndices(vertices)
@@ -133,11 +105,6 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
   #                         -nxb, August 17, 2020
   #========================================================================================
 
-  #====================================================================================================================
-  # NOTE
-  # NOTE:  slight assumption that causes a problem:  I can't really scale  the upperLeg directly to yHeight==1, because the SMPL-X upperLeg we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
-  # NOTE
-  #====================================================================================================================
   #   In code, "T-Pose" translates to      ("` theta==np.zeros( 127*3 )`")
   #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the upperLeg correctly 
 
@@ -168,112 +135,20 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
 
 
 
-# TODO ?    -August 27, 2020
-"""
 
-#==================================================
-def getResizedLeftSMPLX_LowerLegPrettierDraft2Aug24( 
-    verts,
-    customerEstimatedLowerLegLenInches,
-    customerEstimatedHeightInches,
-    prevBodyPartsXStretchingSlashScaling,
-    prevBodyPartsZStretchingSlashScaling,
-    customerEstimatedMaxLowerLegWidthInches_X, 
-    customerEstimatedMaxLowerLegDepthInches_Z)
-  # I think I'll rewrite some of this in main() instead.  
-  # 3 functions: 1. getResizedFuncCall(ankle-to-calf), 2. getResizedFuncCall(calf-to-knee), and 3. getResizedFuncCall(knee-up-to-bottom-of-butt)      seems like its fewer layer of encapsulation while also being more specific and still easy to understand     (makes more sense to me as a code reader and editor [AKA maintainer] )    than just 
-  # 2 functions (1. getRes...Lower(...), and 2. getRes...Upper(...)
-  '''
-    Prettier result, not necessarily prettier code.
-      -nxb, August 24, 2020
-  '''
-  X,Y,Z=0,1,2
-
-  idxOfSMPLXsLeftCalfWithGreatestCircum = leftCalfIdx             (modelType = 'SMPLX')
-  idxOfTopOfSMPLXs_LeftLowerLeg         = topOfLeftLowerLegIdx    (modelType = 'SMPLX')
-  idxOfBottomOfSMPLXs_LeftLowerLeg      = bottomOfLeftLowerLegIdx (modelType = 'SMPLX')
-  raise Exception ("Fill in the above leftCalfIdx, topOfLeftLowerLegIdx, and bottomOfLeftLowerLegIdx code, Nathan.")
-
-  topsYHeight     = verts[idxOfTopOfSMPLXs_LeftLowerLeg][Y]
-  midsYHeight     = verts[idxOfMiddleOfSMPLXs_LeftCalf][Y]
-  bottomsYHeight  = verts[idxOfBottomOfSMPLXs_LeftLowerLeg][Y]
-
-  # reuse this code in a function "def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches)"
-  upperCalfsYHeight = topsYHeight - midsYHeight
-
-  # knee down:
-  scaleLegLinearlyWithYHeight()
-  # knee up:
-  scaleLegLinearlyWithYHeight()
-
-  return LeftLowerLegVerts
-#==================================================
-
-"""
 
 
 
 
 #==================================================
 def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches):
-  # TODO:  make this fast (AKA "performant").   (vectorize it)        -nxb; August 24, 2020 at    5:15 P.M.
-
-  # NOTE:   the code is fairly performant.   (about 5 secs.   O(5 seconds)   )       At least while I'm only scaling the LowerLeg, most of the time is spent on file-IO rather than in this method.     (see output from "cProfile" below ) :     
-
-
-
-#============================================================================================================
-  '''     Some output from the "cProfile" command       (sort by total time taken)
-=============================================================================================================
-          Some output from the "cProfile" command       (sort by total time taken)
-=============================================================================================================
-    "`p3 -m cProfile -s tottime examples/nxb_demo.py --model-folder /home/nathan_bendich/Downloads/SMPL-X_Models/models/ --plot-joints=True --gender="male" `"        -nxb, August 28, 2020
-=============================================================================================================
- 
-
-
-
-
-
-
-
-
-==========================================================================
-   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-==========================================================================
-
-======================================================================================================
-     1336    0.596    0.000    0.596    0.000 {method 'read' of '_io.FileIO' objects}
-    91/88    0.558    0.006    0.562    0.006 {built-in method _imp.create_dynamic}
-      322    0.316    0.001    0.316    0.001 {method 'decompress' of 'zlib.Decompress' objects}
-     1336    0.209    0.000    0.209    0.000 {built-in method marshal.loads}
-     5603    0.201    0.000    0.201    0.000 {built-in method posix.stat}
-      396    0.157    0.000    0.157    0.000 {method 'read' of '_io.BufferedReader' objects}
-     2292    0.154    0.000    0.154    0.000 {method 'format' of 'str' objects}
-  286/207    0.147    0.001    0.181    0.001 {built-in method numpy.core._multiarray_umath.implement_array_function}
-     1336    0.115    0.000    0.711    0.001 <frozen importlib._bootstrap_external>:830(get_data)
-     1081    0.114    0.000    0.114    0.000 {built-in method builtins.compile}
-2725/2666    0.113    0.000    0.289    0.000 {built-in method builtins.__build_class__}
-======================================================================================================
-
-  '''
-
-  # TODO:  make this fast (AKA "performant").   (vectorize it)        -nxb; August 24, 2020 at    5:15 P.M.
-
-  # TODO:  fix all these "hell-names" while also making sure the names are actually descriptive to future readers.  Perhaps you should just document?    -nxb, August 27, 2020 at 6:12 P.M.
-  #   There's no way to make everything PERFECT, Bendich.
-  #   By "hell-names," I mean shit like "xWidthAtTopYHeight_RealCustomerInches", "xWidthAtBotYHeight_RealCustomerInches",   -nxb, August 27, 2020 at 6:12 P.M.
-  #   It was even worse at other time(s):  ridiculously long names and shit like "xWidth_RealCustomerMeasure_InInches_atTopYHeightTheYValueOfWhichIsInPixelInches"
-  #   -nxb, August 27, 2020 at 6:12 P.M.
-
-  # TODO:  find the bug(s) in this function    and/or approach.   -nxb;   Aug 24, 3:39 P.M.
-  # TODO: rename variables so it's clear to future-NXB that xWidthAtBotYHeight_RealCustomerInches, xWidthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches, and zDepthAtTopYHeight_RealCustomerInches are REAL_CUSTOMER_MEASURES_IN_INCHES.
   '''
     @Explanation:
 
     This function assumes a body part like the lower leg
       scales (roughly) in both the width (x) and depth (z) directions   LINEARLY with height
       (as of August 24, 2020)
+
     A simple example should illustrate better than my long, overly academic, awkward words:
       1.  Say we resize Nathan's human thigh to fit precisely in a cube of 10, 10, 10 units.
         Nathan's thigh is "verts"
@@ -308,64 +183,29 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
     Error-checking:   (assert verts[:,Y].max() == yTop       and    verts[:,Y].min() == yBot)
   '''
 
-  # TODO: write this function with proper error-checking.     rewrite this with proper error-checking, proper input of parameters into the function "scaleLegLinearlyWithYHeight(verts,  ... ,  ... ,  ... ,  ... ,  ... ,  ... )"    instead of just "moreParams" as we put in the funccall to scaleLegLinearlyWithYHeight() on line 619 in the function entitled "getResizedLeftSMPLX_LowerLeg()"       -nxb, August 27, 2020
 
-
-
-
-
-  # TODO
-  # TODO:   make sure "`np.isclose()`" has a high enough tolerance.     (ie. the assertion shouldn't fail when everything is fine)     -nxb, August 24, 2020
-  # TODO
-  #assert np.isclose(verts[:,Y].max(), yTop)       and    np.isclose(verts[:,Y].min(), yBot)      # TODO: rewrite this with proper error-checking, proper input of parameters into the function "scaleLegLinearlyWithYHeight(verts,  ... ,  ... ,  ... ,  ... ,  ... ,  ... )"    instead of just "moreParams" as we put in the funccall to scaleLegLinearlyWithYHeight() on line 619 in the function entitled "getResizedLeftSMPLX_LowerLeg()"
-  # TODO
-  # TODO:   make sure "`np.isclose()`" has a high enough tolerance.     (ie. the assertion shouldn't fail when everything is fine)     -nxb, August 24, 2020
-  # TODO
-
+# August 31, 2020:   header for this function is
+#   "def of func scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches): "
   X,Y,Z=0,1,2
-  verts_ = deepcopy(verts) # b/c accessor, not mutator method.  -nxb, August 24, 2020
+  verts_ = deepcopy(verts) 
   """ In other words, side effects and state are BAD;
-    Using "deepcopy" is more "functional" than mutating the original numpy.ndarray, which is    GOOD.  """
+    Using "deepcopy" is more "functional" than mutating the original numpy.ndarray, which is    GOOD.
+    -nxb, August 24, 2020  """
 
-  #height = yTop-yBot        # NOTE: I read these lines again, and I'm PRETTY sure I don't need them to get the right answer.     -nxb, August 27, 2020
-  #=======================================
-  # along the height of the leg:
+  # Iterate up the height of the leg:
   #=======================================
   for i,yVal in enumerate(verts_[:,Y]):
   #=======================================
-
-    #  NOTE: The correct, well-thought-through lines are below.   -nxb, August 27, 2020
-    #currsHeight = yVal - yBot        # NOTE: I read these lines again, and I'm PRETTY sure I don't need them to get the right answer.     -nxb, August 27, 2020
-    #height - currsHeight / height    # NOTE: I read these lines again, and I'm PRETTY sure I don't need them to get the right answer.     -nxb, August 27, 2020
-    #  NOTE: The correct, well-thought-through lines are below.   -nxb, August 27, 2020
-
+    # NOTE:
+    """   It's kind of hard to understand this "x (width) scaling" and "z (depth) scaling" code.  
+         See reasons in extended documentation below   
+         (search for "DOCUMENTATION for this code" as of August 28, 2020) """
     #========================
     #   x (width) scaling:   
     #========================
     m = slope = (xWidthAtTopYHeight_RealCustomerInches - xWidthAtBotYHeight_RealCustomerInches) / (yTop - yBot)
-    # it's kind of hard to understand this code.  See reasons in extended documentation below   (search for "DOCUMENTATION for this code" as of August 28, 2020)
     b = yInterceptOnTheGraph = xWidthAtTopYHeight_RealCustomerInches - (m*yTop)
     xScaling = m*yVal + b
-    pn(2)
-    pe(99)
-    print("m: ")
-    print(m)
-    pe(99)
-    pn(2)
-    """
-    pn(2)
-    pe(99)
-    print("type(xScaling): ")
-    print(type(xScaling) )
-    print("i: ")
-    print(i)
-    print("X: ")
-    print(X)
-    print("verts_[i,X].shape: ")
-    print(verts_[i,X].shape)
-    pe(99)
-    pn(2)
-    """
     verts_[i,X] *= xScaling
 
     #========================
@@ -375,19 +215,15 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
     b = yInterceptOnTheGraph = zDepthAtTopYHeight_RealCustomerInches - (m*yTop)
     zScaling = m*yVal + b # again, not quite y = m*x+b.  See thorougher documentation after the function for reasoning -August 24, 2020. 
     verts_[i,Z] *= zScaling
-    pn(1)
-    pe(99)
-    print(' '*30 + "xScaling:")
-    print(' '*33 + str(xScaling) )    # why are these both 5.0?     -nxb, August 28, at 1:53 P.M.
-    print(' '*30 + "zScaling:")
-    print(' '*33 + str(zScaling) )    # why are these both 5.0?     -nxb, August 28, at 1:53 P.M.
-    pe(99)
-    pn(1)
+    pPrintVarNXB(m, "m", nNewlines=1, nEquals=99)
+    pPrintVarNXB(xScaling, "xScaling", nNewlines=1, nEquals=99)
+    pPrintVarNXB(zScaling, "zScaling", nNewlines=1, nEquals=99)
+    # why are both xScaling and zScaling== 5.0?     -nxb, August 28, at 1:53 P.M.
   #============================================
   #end "for i, yVal in enumerate(verts_[:,Y]):"
   #============================================
 
-  return verts_  # 90% sure this is a deepcopy so this isn't where the bug is   -nxb, August 28, 2020      at 1:31 P.M.
+  return verts_
 
     #==========================================================================================
     #==========================================================================================
@@ -463,20 +299,199 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
 
 
 
+#======================================================================================================
+# FIXME: ======================================================================================= FIXME
+#TimsRealAnkleZDepthInches  =  5  # FIXME:     calculate Tim's from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+# FIXME: ======================================================================================= FIXME
+#======================================================================================================
+
+
+
+  # FIXME:   these measurements are actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
+
+#===================================================================================================
+def customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+  # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
+  NXBs_REAL_KNEE_Z_DEPTH_IN_INCHES  = 4.75
+  return NXBs_REAL_KNEE_Z_DEPTH_IN_INCHES
+  # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # FIXME: rename(s)    Calf => knee
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  '''       -nxb, August 14, 2020
+    For both:
+      1.    TIM_PIXEL_HEIGHT_INCHES  and
+        (and)
+      2.    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES
+    I (NXB) measured Tim's height in inches using a video of him, viewed on my laptop screen, and then held up a ruler to measure it.
+    The pic of him can be found in NXB's Dropbox (Dropbox/vr_mal.../IMPOR.../Tim_Schrader_8_frames.../*)     
+    (The filepath on NXB's HP laptop is "` /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `")
+
+    Algorithm for what I did to get these measurements:
+    1) open the image with "`feh`" :
+      (`feh /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `)
+      and then
+    2) hit the "down" arrow key 3 times to "zoom out." and then    
+    3) measured between 2 "pixel points" I visually estimated on my laptop screen   with the ruler    TODO: reformat this comment in a 
+      a) for TIM_PIXEL_HEIGHT_INCHES,
+        I measured between 
+          1. the top of    Tim's head on the screen and   
+          2. the bottom of Tim's feet on the screen
+      b) for TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES  
+        I measured between 
+          1. the "inside" of Tim's knee on the screen and the    
+          2. the  inside of Tim's left ankle on the screen
+  # end comment:  }   (})
+
+     -nxb, August 14, 2020
+  '''
+#===================================================================================================
+
+# FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+#===================================================================================================
 
 
 
 
+#===================================================================================================
+def customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+  NXBs_REAL_ANKLE_X_WIDTH_IN_INCHES = 2.5
+  return NXBs_REAL_ANKLE_X_WIDTH_IN_INCHES
+  '''       -nxb, August 14, 2020
+    For both:
+      1.    TIM_PIXEL_HEIGHT_INCHES  and
+        (and)
+      2.    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES
+    I (NXB) measured Tim's height in inches using a video of him, viewed on my laptop screen, and then held up a ruler to measure it.
+    The pic of him can be found in NXB's Dropbox (Dropbox/vr_mal.../IMPOR.../Tim_Schrader_8_frames.../*)     
+    (The filepath on NXB's HP laptop is "` /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `")
+
+    Algorithm for what I did to get these measurements:
+    1) open the image with "`feh`" :
+      (`feh /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `)
+      and then
+    2) hit the "down" arrow key 3 times to "zoom out." and then    
+    3) measured between 2 "pixel points" I visually estimated on my laptop screen   with the ruler    TODO: reformat this comment in a 
+      a) for TIM_PIXEL_HEIGHT_INCHES,
+        I measured between 
+          1. the top of    Tim's head on the screen and   
+          2. the bottom of Tim's feet on the screen
+      b) for TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES  
+        I measured between 
+          1. the "inside" of Tim's knee on the screen and the    
+          2. the  inside of Tim's left ankle on the screen
+  # end comment:  }   (})
+
+     -nxb, August 14, 2020
+  '''
+#===================================================================================================
 
 
 
 
+#===================================================================================================
+#def customersAnkleZDepthInches(customerImgFname, OpenPoseKPS, binaryMask):
+def customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+  NXBs_REAL_ANKLE_Z_DEPTH_IN_INCHES = 3.5
+  return NXBs_REAL_ANKLE_Z_DEPTH_IN_INCHES
+  '''       -nxb, August 14, 2020
+    For both:
+      1.    TIM_PIXEL_HEIGHT_INCHES  and
+        (and)
+      2.    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES
+    I (NXB) measured Tim's height in inches using a video of him, viewed on my laptop screen, and then held up a ruler to measure it.
+    The pic of him can be found in NXB's Dropbox (Dropbox/vr_mal.../IMPOR.../Tim_Schrader_8_frames.../*)     
+    (The filepath on NXB's HP laptop is "` /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `")
+
+    Algorithm for what I did to get these measurements:
+    1) open the image with "`feh`" :
+      (`feh /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `)
+      and then
+    2) hit the "down" arrow key 3 times to "zoom out." and then    
+    3) measured between 2 "pixel points" I visually estimated on my laptop screen   with the ruler    TODO: reformat this comment in a 
+      a) for TIM_PIXEL_HEIGHT_INCHES,
+        I measured between 
+          1. the top of    Tim's head on the screen and   
+          2. the bottom of Tim's feet on the screen
+      b) for TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES  
+        I measured between 
+          1. the "inside" of Tim's knee on the screen and the    
+          2. the  inside of Tim's left ankle on the screen
+  # end comment:  }   (})
+
+     -nxb, August 14, 2020
+  '''
+#===================================================================================================
+
+#======================================================================================================
+# FIXME: ======================================================================================= FIXME
+#TimsRealAnkleXWidthInches  =  5  # FIXME:     calculate Tim's from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+# FIXME: ======================================================================================= FIXME
+#======================================================================================================
 
 
 
 
+#===================================================================================================
+def customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
+  # TODO:  "Calf" ==> "Knee"      -nxb, 2:34 P.M. EDT on August 28, 2020                  
 
+  
+  NXBs_REAL_KNEE_X_WIDTH_IN_INCHES = 4.125 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  # FIXME: rename(s)    Calf => knee
+  # FIXME: rename(s)
+  # FIXME: rename(s)
+  return NXBs_REAL_KNEE_X_WIDTH_IN_INCHES
+  #return CONST
+  # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  '''       -nxb, August 14, 2020
+    For both:
+      1.    TIM_PIXEL_HEIGHT_INCHES  and
+        (and)
+      2.    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES
+    I (NXB) measured Tim's height in inches using a video of him, viewed on my laptop screen, and then held up a ruler to measure it.
+    The pic of him can be found in NXB's Dropbox (Dropbox/vr_mal.../IMPOR.../Tim_Schrader_8_frames.../*)     
+    (The filepath on NXB's HP laptop is "` /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `")
 
+    Algorithm for what I did to get these measurements:
+    1) open the image with "`feh`" :
+      (`feh /home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/Tim_Schrader_8_Frames_____June_30_2020/0_degrees_____facing_camera.jpg `)
+      and then
+    2) hit the "down" arrow key 3 times to "zoom out." and then    
+    3) measured between 2 "pixel points" I visually estimated on my laptop screen   with the ruler    TODO: reformat this comment in a 
+      a) for TIM_PIXEL_HEIGHT_INCHES,
+        I measured between 
+          1. the top of    Tim's head on the screen and   
+          2. the bottom of Tim's feet on the screen
+      b) for TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES  
+        I measured between 
+          1. the "inside" of Tim's knee on the screen and the    
+          2. the  inside of Tim's left ankle on the screen
+  # end comment:  }   (})
+
+     -nxb, August 14, 2020
+  '''
+#===================================================================================================
+
+  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+  #TimsRealCalfXWidthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
+  #===================================================================================================
 
 
 #==================================================
@@ -553,7 +568,7 @@ def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
 
 #==================================================
 # generalized version:      
-#     def getResizedLeftSMPLX_LowerLeg(
+#     def makeLeftLeg(
 #         vertices,
 #         customerEstimatedLowerLegLenInches,
 #         customerEstimatedHeightInches, 
@@ -563,96 +578,28 @@ def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
 #         currBodyPartsZStretchingSlashScaling): 
 #       # we don't have this variable "`customerEstimatedLowerLegLenInches`"  , 
 #==================================================
-def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
+def makeLeftLeg(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
+  #========================================================================
+  # TODO:  write in calf and thigh indices and real measurements in inches
+  #     -nxb, August 31, 2020
+  #========================================================================
+
   # NOTE:   even with "`pyrender.show()`" ,   this code is fairly performant.   (about 5 secs.   O(5 seconds)   )       At least while I'm only scaling the LowerLeg, most of the time is spent on file-IO rather than in this method.
+  # TODO: update the docstring.
   '''
-    This lowerLeg function SHOULD do the following:                  (August 18, 2020)
-      (This docstring was written on August 18, 2020)
+    docstring
+    docstring
 
-      """
-        Expected, desired, non-buggy behavior:
-          1.  Returns vertices **__MOSTLY__** centered on (0,0,0),   except the yMin is now 0.   
-
-          2.  The truth is a little more detailed:
-            a.  Basically, the SMPL-X base model I'm using has the center of the chest at (0,0,0).  
-              (ie. The sternum is at the right xy position.  The anatomical location of z==0 is about as "deep" in the human body as the armpit(s))
-            b.  Therefore, the output mesh should have the "bottom of the lowerLeg" at y==0 for easier matching
-
-          This is only the way it should be for bodyParts like the upperLeg-lowerLeg boundary where the translation-before-smoothing is all along the **__Y__** axis.  For instance, for the foreArm-upperArm boundary in T-pose, the boundary should be along the **__X__** axis **__INSTEAD__**
-      """
+    @param vertices
+    @param joints
+    TODO: docstring
   '''
 
-  #raise Exception( "fucking finish your code, Bendich.")
-
-  # Idea:   have this spit out all the body parts with centroids at (0,0,0) ?    Then it's a different function's job to "put Humpty-Dumpty back together again"      -NXB, August 15, 2020
-
-  # NOTE:    generalize this to be "getResizedLeftSMPLX_BodyPartNameHere(..., otherParams, ...)"  ?
-  #   -nxb, August 15, 2020
-  '''
-    This function can be generalized to each body part?
-    Code reuse would prevent some headaches, make it so changing error-catching in just the general function would fix the error(s) for all the body parts rather than just the one, 
-
-    August 15, 2020
-  '''
-
-
-  # TODO:  find the EXACT RIGHT VERTEX  in SMPL-X that will let us scale the lowerLeg correctly
   #===================================================================================================
+  #   As of August 31, 2020   the function header was entitled:
   #===================================================================================================
+  # def makeLeftLeg(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
   #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  # NOTE NOTE NOTE NOTE NOTE
-  # NOTE: NOTE: NOTE: NOTE: NOTE:  slight assumption that causes a problem:  I can't really scale  the lowerLeg directly to yHeight==1, because the SMPL-X lowerLeg we get in T-Pose IS SLANTED, not completely "vertical," EVEN WHEN the pose is the "canonical T-Pose"
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
-  # NOTE NOTE NOTE NOTE NOTE
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  #======================================================
-  # TODO    TODO TODO TODO TODO
-  # NOTE NOTE NOTE NOTE NOTE
-  # NOTE NOTE NOTE NOTE NOTE
-  #======================================================
-  #              ACTUAL CODE starts here:
-  #======================================================
-  # NOTE NOTE NOTE NOTE NOTE
-  # NOTE NOTE NOTE NOTE NOTE
-  # TODO TODO  TODO TODO TODO
-  #======================================================
-
-
-
-
-
-    #===================================================================================================
-    #   As of August 15, at 8:31 P.M.  EDT,   the function header was entitled:
-    #===================================================================================================
-    # function header " getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches): "
-    #===================================================================================================
   X,Y,Z=0,1,2
 
   leftLowerLegIdxes = leftLowerLegIndices(vertices)
@@ -667,25 +614,6 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   # TODO: rename all these hellishly-long-variable names to simply "leftLowerLegVerts"  
   leftLowerLegVertsCenteredOnOrigin = leftLowerLegVerts - origLowerLegCentroid
   jointsCenteredOnOrigin = joints - origLowerLegCentroid
-  '''
-  pe(99)
-  print("leftLowerLegVerts.shape: ")
-  print(leftLowerLegVerts.shape)
-  print("joints.shape")
-  print(joints.shape)
-  print("joints[:3]:")
-  print(joints[:3])
-  print("jointsCenteredOnOrigin[:3]:")
-  print(jointsCenteredOnOrigin[:3])
-  print("origLowerLegCentroid")
-  print(origLowerLegCentroid)
-  pe(99)
-  print("jointsCenteredOnOrigin.shape")
-  print(jointsCenteredOnOrigin.shape)
-  print("origLowerLegCentroid.shape")
-  print(origLowerLegCentroid.shape)
-  pe(99)
-  '''
 
   #====================================================================================
   # Scale down:
@@ -728,97 +656,11 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   jointsCenteredOnOrigin[:,Y] *= customerEstimatedLowerLegLenInches
   jointsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z
 
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  # TODO TODO TODO TODO TODO
-  # TODO TODO TODO TODO TODO:    put in the real params "yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches,"     and "zDepthAtBotYHeight_RealCustomerInches" into func "scaleLegLinearlyWithYHeight(... ,  ... ,  ... ,  ... ,  ... ,  ... )"        instead of just "moreParams" (August 27, 2020)
-  moreParams=1 # TODO TODO TODO TODO TODO:    put in the real params "yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches,"     and "zDepthAtBotYHeight_RealCustomerInches" into func "scaleLegLinearlyWithYHeight(... ,  ... ,  ... ,  ... ,  ... ,  ... )"        instead of just "moreParams" (August 27, 2020)
-  # TODO TODO TODO TODO TODO:    put in the real params "yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches,"     and "zDepthAtBotYHeight_RealCustomerInches" into func "scaleLegLinearlyWithYHeight(... ,  ... ,  ... ,  ... ,  ... ,  ... )"        instead of just "moreParams" (August 27, 2020)
-  # TODO TODO TODO TODO TODO
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-  #===================================================================================================
-
-  #===================================================================================================
-  def customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
-    # TODO:  "Calf" ==> "Knee"      -nxb, 2:34 P.M. EDT on August 28, 2020                  
-
-    
-    NXBs_REAL_KNEE_X_WIDTH_IN_INCHES = 4.125 # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # FIXME: rename(s)    Calf => knee
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    return NXBs_REAL_KNEE_X_WIDTH_IN_INCHES
-    #return CONST
-    # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-  NXBsRealCalfXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )     # FIXME:   this is actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  TimsRealCalfXWidthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  #===================================================================================================
-
-  #===================================================================================================
-  def customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
-    # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
-    
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
-    NXBs_REAL_KNEE_Z_DEPTH_IN_INCHES  = 4.75
-    return NXBs_REAL_KNEE_Z_DEPTH_IN_INCHES
-    # KNEE KNEE KNEE         not CALF right now.  -nxb; Aug 28 at 2:43 P.M. EDT
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # FIXME: rename(s)    Calf => knee
-    # FIXME: rename(s)
-    # FIXME: rename(s)
-    # TODO: fill in with image-based first-principles-calculations.  -nxb; August 27, 2020
+  # FIXME:   these measurements are actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
+  NXBsRealCalfXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
   NXBsRealKneeZDepthInches  = TimsRealCalfZDepthInches=  customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  TimsRealCalfZDepthInches  =  5  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  # FIXME:     calculate it from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  #===================================================================================================
-
-  #===================================================================================================
-  def customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
-    NXBs_REAL_ANKLE_X_WIDTH_IN_INCHES = 2.5
-    return NXBs_REAL_ANKLE_X_WIDTH_IN_INCHES
   NXBsRealAnkleXWidthInches = TimsRealAnkleXWidthInches = customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
-  #======================================================================================================
-  # FIXME: ======================================================================================= FIXME
-  #TimsRealAnkleXWidthInches  =  5  # FIXME:     calculate Tim's from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  # FIXME: ======================================================================================= FIXME
-  #======================================================================================================
-
-  #===================================================================================================
-  #def customersAnkleZDepthInches(customerImgFname, OpenPoseKPS, binaryMask):
-  def customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') ):
-    NXBs_REAL_ANKLE_Z_DEPTH_IN_INCHES = 3.5
-    return NXBs_REAL_ANKLE_Z_DEPTH_IN_INCHES
   NXBsRealAnkleZDepthInches = TimsRealAnkleZDepthInches = customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
-
-  #======================================================================================================
-  # FIXME: ======================================================================================= FIXME
-  #TimsRealAnkleZDepthInches  =  5  # FIXME:     calculate Tim's from the video / from a few images rather than doing it this way with a CONST.       -nxb, August 27, 2020
-  # FIXME: ======================================================================================= FIXME
-  #======================================================================================================
-
-
-
-
 
   # TODO: change this from "calf" to "knee" ?   Briefly (ie. today)    requires less work.     -nxb; August 28, 2020
   yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = -0.3      # where the Knee  is on the SMPL-X model      (y-dimension is foot to scalp)      (these were hard-coded before August 27, 2020 -nxb)
@@ -827,31 +669,31 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
   LEFT_ANKLE  = 7   # see   "`/home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/smplx_manuallyAdjust2EachCustomer/smplx/joint_names.py`"  for details.
   yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = jointsCenteredOnOrigin[LEFT_KNEE  , Y]    #  8.715
   yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1  = jointsCenteredOnOrigin[LEFT_ANKLE , Y]    # -9.715
-  pn(2)
-  pe(len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:" )  +4   )
-  print("  yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1 : " )    #  8.715
-  print(yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1 )
-  print("  yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1: ")     # -9.393
-  print(yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1)
-  pe(len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:" )  +4   )
-  pn(2)
+  pPrintVarNXB("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:", yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:")+4)     #  8.715
+  pPrintVarNXB("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1:", yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1:")+4)  # -9.393
 
-  leftLegAnkleToCalfCenteredOnOrigin =scaleLegLinearlyWithYHeight(
-    # TODO:  work backward from this function call.   (joints['ankleHeightY'] and/or vertices['calf'] )     -nxb, August 27, 2020
-    leftLowerLegVertsCenteredOnOrigin, yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, TimsRealCalfXWidthInches, TimsRealAnkleXWidthInches, TimsRealCalfZDepthInches, TimsRealAnkleZDepthInches)   # FIXME:     there's a lot of crap in here that should be changed.     For instance,     -nxb on August 28, 2020      at 1:15 P.M. EDT
+  #===========================================================
+  # Get indices of vertices between left Ankle and left Knee:
+  #===========================================================
+  idxsAnkleToKnee, vertsAnkleToKnee = filterVertsBtwn(
+    leftLowerLegVertsCenteredOnOrigin, 
+    yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, 
+    yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,
+    axis='y')
+  # Scale vertices between Ankle and Calf :
+  leftLowerLegVertsCenteredOnOrigin[idxsAnkleToKnee]  = scaleLegLinearlyWithYHeight(
+    vertsAnkleToKnee, 
+    yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, 
+    yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, 
+    TimsRealCalfXWidthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
+    TimsRealAnkleXWidthInches, 
+    TimsRealCalfZDepthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
+    TimsRealAnkleZDepthInches)   # FIXME:     there's a lot of crap in here that should be changed.     -nxb on August 28, 2020      at 1:15 P.M. EDT
 
-  """
-  leftLowerLegVertsCenteredOnOrigin = scaleLegLinearlyWithYHeight(
-    leftLowerLegVertsCenteredOnOrigin, yTop, yBot, xWidthAtTopYHeight_RealCustomerInches, xWidthAtBotYHeight_RealCustomerInches, zDepthAtTopYHeight_RealCustomerInches, zDepthAtBotYHeight_RealCustomerInches ) # TODO TODO TODO TODO TODO
-  """
-    # NOTE:  why did I want the function "scaleLegLinearlyWithYHeight" to spit out the ?
-  #====================================================================================
-  # Here the lowerLeg is normally proportioned again because we're using the customer's **__ACTUAL__**   Depth, Width, and Height.     
-  #   -nxb, August 17, 2020
-  #====================================================================================
-  #leftLowerLegVertsCenteredOnOriginScaledToRealLowerLegLenInches = leftLowerLegVertsCenteredOnOriginNormalizedTo1 * customerEstimatedLowerLegLenInches
-  #leftLowerLegVertsCenteredOnOrigin *= customerEstimatedLowerLegLenInches
-  #       TODO:  find the exact right vertex (multiple vertic(es), ESPECIALLY when the WHOLE BODY comes into play)  in SMPL-X that will let us scale the lowerLeg correctly 
+  #========================================================================
+  # TODO:  write in calf and thigh indices and real measurements in inches
+  #     -nxb, August 31, 2020
+  #========================================================================
 
   # Translate:
   #   Translate back to original centroid: 
@@ -866,7 +708,7 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
     'Z' : customerEstimatedMaxLowerLegDepthInches_Z / currHeightZ,
   }
   return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, leftLowerLegXYZScaleParams # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "makeLeftLeg(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
-#================================================== end function def of   "getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):    # we don't have this customerEstimatedLowerLegLenInches, ==================================================
+#================================================== end function def of   "makeLeftLeg(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):    # we don't have this customerEstimatedLowerLegLenInches, ==================================================
 
 
 
@@ -921,18 +763,11 @@ def getResizedLeftSMPLX_LowerLeg(vertices, joints, customerEstimatedLowerLegLenI
 
 
 
-#==================================================
-# TODO:  resurrect a general version of this (ie. all you have to do is tell it "lLowerLegLen" or "lUpperLegLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
-"""
-  # TODO:  resurrect a general version of this (ie. all you have to do is tell it "lLowerLegLen" or "lUpperLegLen" and it spits out a properly resized   'numpy.ndarray' variable    "`SMPLX_Verts`"
-def filterVerts(vs):
-  '''
-    TODO:  generalize w/ a keyword arguments?      (ie. "lLowerLeg" or "lUpperLeg" or "lFoot" or whatever)
-      -nxb; Aug 14, 2020
-  '''
-  return filterVertsLeftLowerLeg(vs)
-"""
-#==================================================
+
+
+
+
+
 
 #==================================================
 def leftUpperLegIndices(vs):
@@ -995,44 +830,6 @@ def leftLowerLegIndices(vs):
   #return leftLowerLeg
 #==================================================
 
-#==================================================
-def makeLeftLeg(TODO_TODO_TODO_TODO_TODO_____params):
-  '''
-    Given the lowerLeg and upperLeg
-
-    1.  Translates them on top of each other
-    2.  Resizes to the appropriate extent
-  '''
-  # PARAMS:   NOTE TODO:
-#def makeLeftLeg(... , ... , ...    ...(nParams is variable)  ):
-  # TODO:  uncomment the "`raise Exception(...)  `" line
-  #raise Exception( "fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")    # TODO:    re-raise this exception
-    # TODO:    finish this function
-    # TODO:    finish this function
-    # TODO:    finish this function
-    # TODO:    finish this function
-    # TODO:    finish this function
-
-  print("fucking finish your UpperLeg     code, Bendich.     ('getResizedLeftSMPLX_UpperLeg()'  is the full name)")
-
-  X,Y,Z=0,1,2
-  """
-  leftUpperLegVerts
-  leftLowerLegVerts
-  #leftLowerLegVerts
-  leftLegIdxes = np.concatenate(leftLowerLegIdxes, leftUpperLegIdxes) # maybe I have to type "`idxes[0]`"    to dereference the np.ndarray from the list
-
-  resizedLeftUpperLegVerts[:,Y] += resizedLeftLowerLegVerts[:,Y].max() # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )
-  resizedLeftUpperLegVerts[:,Y] += resizedLeftLowerLegVerts[:,Y].max() # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )
-  # TODO:   more shit;   more shit from the main()    into this "boyo"
-  # TODO:   more shit;   more shit from the main()    into this "boyo"
-  # TODO:   more shit;   more shit from the main()    into this "boyo"
-  # TODO:   more shit;   more shit from the main()    into this "boyo"
-  # TODO:   more shit;   more shit from the main()    into this "boyo"
-  """
-  return
-#==================================================
-
 
 #==================================================
 def main(model_folder, model_type='smplx', ext='npz',
@@ -1051,7 +848,7 @@ def main(model_folder, model_type='smplx', ext='npz',
     local_output_dir_fname='/home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/smplx_manuallyAdjust2EachCustomer/examples/'
     #local_output_dir_fname='/home/nathan_bendich/Documents/code/gitCloned/smplx/examples/'  # in DropBox now.     -nxb;   August 14, 2020.
     #betas = torch.randn([1, 10], dtype=torch.float32)    originally random
-    betas = torch.zeros([1, 10], dtype=torch.float32)    #originally random      -nxb, August 13, 2020
+    betas = torch.zeros([1, 10], dtype=torch.float32)    # -nxb, August 13, 2020
     #betas[0]=4     # NOTE: changing the betas actually changes the verts.    -nxb, August 13, 2020
     expression = torch.randn([1, 10], dtype=torch.float32)
 
@@ -1059,7 +856,14 @@ def main(model_folder, model_type='smplx', ext='npz',
                    return_verts=True)
     vertices = output.vertices.detach().cpu().numpy().squeeze()
     joints = output.joints.detach().cpu().numpy().squeeze()
-    #TIM_ESTIMATED_LOWER_LEG_LENGTH_INCHES = ...  # TODO: automate estimating customer's lowerLeg length from video(s) and OpenPose.  -nxb, August 14, 2020
+
+
+
+    #==============================================================================================
+    #==============================================================================================
+
+    #  TIM_ESTIMATED_LOWER_LEG_LENGTH_INCHES = ...
+    #===============================================
     # NOTE: 
     '''       -nxb, August 14, 2020
       For both:
@@ -1115,20 +919,9 @@ def main(model_folder, model_type='smplx', ext='npz',
     NXB_LOWER_LEG_WIDTH_AKA_X_INCHES  = 4  #  This is the widest  LowerLegWidth.   Obviously a lowerLeg and a calf is a complicated thing.  The maxWidth ends up being of the calf.      (x is AKA    "fingertip-to-fingertip in T-pose" )
     NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES  = 5  #  This is the deepest LowerLegDepth.   Obviously the lower leg's skin has a complicated mesh that can't be captured with 2 or 3 lengths.  The maxDepth ends up being near the shin.      (z is AKA    "bellyButton-To-Spine," AKA "Dorsal-to-ventral")
     #================================================================================
-    #================================================================================
-    #================================================================================
 
     TIM_ANKLE_WIDTH_AKA_X_INCHES  = 3.25 
     TIM_ANKLE_DEPTH_AKA_Z_INCHES  = 3.75
-
-    # """
-    # NXB's lowerLeg (measured with a real measuring tape) is roughly 
-    #   18 inches, 
-    #     and my calculation says 
-    #   17.89 inches for Tim Schrader's lowerLeg.  
-    # So my calculation is is probably MOSTLY correct.    
-    # """
-    #    -nxb;   on August 14, 2020      (more technically, 8:19 P.M. EDT    on August 14, 2020)
 
     #================================================================================
     #================================================================================
@@ -1138,47 +931,14 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #================================================================================
     #================================================================================
-    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegParams = getResizedLeftSMPLX_LowerLeg(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
-                                             #getResizedLeftSMPLX_LowerLeg(vertices, customerEstimatedLowerLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_LOWER_LEG_WIDTH_AKA_X_INCHES, TIM_LOWER_LEG_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedLowerLegLenInches, 
+    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegParams = makeLeftLeg(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
     vertsWithResizedLeftLowerLeg = deepcopy(vertices)
     vertsWithResizedLeftLowerLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
     #================================================================================
 
     # TODO:     leftUpperLegParams  for merging UpperLegs with lowerLegs        (in "`getResizedLeftSMPLX_UpperLeg(... , ... , ... )`")
-    resizedLeftUpperLegVerts, leftUpperLegIdxes, leftUpperLegParams = getResizedLeftSMPLX_UpperLeg(vertices, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
-    #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
-    vertsWithResizedLeftUpperLeg = deepcopy(vertices)
-    vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
- 
 
 
-    #====================================================================
-    # Translation code. comment written August 24, 2020
-    #====================================================================
-
-    #====================================================================
-    # TODO:  put this code into func "makeLeftLeg(... , ... , ... , ...)"
-    #====================================================================
-    #                            start
-    #====================================================================
-
-    #=========================================================
-    #   def makeLeftLeg(... , ... ,    ... (moreParams)   ):
-    #=========================================================
-
-
-    #====================================================
-    # Move the    lowerLeg back and forth and     
-    #                      left and right until it's directly 
-    #   under the upperLeg
-    #
-    #   -nxb, August 18, 2020
-    #====================================================
-    # (I begun a more technical way of saying it, 
-    #   but I figure the code is the technically arcane, hard-to-understand version anyway.  
-    # In case you want to see my "failures," here's the more "arcane" diction-style comment:    
-    #   "Calculate the "lateral" shift to align the vertices:"      -nxb, August 18, 2020
-    #====================================================
 
 
     # Translation code. comment written August 24, 2020
@@ -1186,6 +946,11 @@ def main(model_folder, model_type='smplx', ext='npz',
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
+
+    resizedLeftUpperLegVerts, leftUpperLegIdxes, leftUpperLegParams = getResizedLeftSMPLX_UpperLeg(vertices, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, TIM_ANKLE_WIDTH_AKA_X_INCHES, TIM_ANKLE_DEPTH_AKA_Z_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
+    #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
+    vertsWithResizedLeftUpperLeg = deepcopy(vertices)
+    vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
 
 
     lowerLegHeightMagnitude = resizedLeftLowerLegVerts[:,Y].max() - resizedLeftLowerLegVerts[:,Y].min()
@@ -1197,54 +962,22 @@ def main(model_folder, model_type='smplx', ext='npz',
         resizedLeftLowerLegVerts[:,Y],
         lowerLegEndsY - LOWER_LEG_____BOUNDARY_SKIN_END_CONST #     (I have to do math in this line    because this is pre-translation-up-and-down)      -nxb, August 18, 2020
       ))[0]    # TODO:    rename this awkwardly named "LOWER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
-    pn(2)
-    print('='*99) # comment written     August 18, 2020
-    print("lowersTopBoundarySkinIdxs: ") # comment written     August 18, 2020
-    print(lowersTopBoundarySkinIdxs) # comment written     August 18, 2020
-    print('='*99) # comment written     August 18, 2020
-    pn(2)
+    pPrintVarNXB(lowersTopBoundarySkinIdxs, "lowersTopBoundarySkinIdxs:", nNewlines=2, nEquals=99) # comment written     August 18, 2020
     uppersBottomBoundarySkinIdxs = np.where(
       np.less(
         resizedLeftUpperLegVerts[:,Y],
         UPPER_LEG_____BOUNDARY_SKIN_END_CONST))[0]    # TODO:    rename this awkwardly named "UPPER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
-    pn(2)
-    print('='*99) # comment written     August 18, 2020
-    print("uppersBottomBoundarySkinIdxs: ")# comment written     August 18, 2020
-    print(uppersBottomBoundarySkinIdxs)# comment written     August 18, 2020
-    print('='*99)# comment written     August 18, 2020
-    pn(2)
-
-    pe(77)
-    print("resizedLeftLowerLegVerts.shape :")# comment written     August 18, 2020
-    print(resizedLeftLowerLegVerts.shape)# comment written     August 18, 2020
-    print("resizedLeftUpperLegVerts.shape :")# comment written     August 18, 2020
-    print(resizedLeftUpperLegVerts.shape)# comment written     August 18, 2020
-    pe(77)
+    pPrintVarNXB(uppersBottomBoundarySkinIdxs, "uppersTopBoundarySkinIdxs:", nNewlines=2, nEquals=99) # comment written     August 18, 2020
+    pPrintVarNXB(resizedLeftLowerLegVerts.shape,"resizedLeftLowerLegVerts.shape :", nNewlines=1, nEquals=77)# comment written     August 18, 2020
 
     # Translation code. comment written August 24, 2020
     lowersTopBoundarySkin     = resizedLeftLowerLegVerts[lowersTopBoundarySkinIdxs    ]     
     uppersBottomBoundarySkin  = resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs ]   
     # OR,  more technically, resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs, : ]     -August 18, 2020
-    pn(2)
-    pe(77)
-    print(lowersTopBoundarySkin.shape)# comment written     August 18, 2020
-    print(uppersBottomBoundarySkin.shape)# comment written     August 18, 2020
-    pe(77)
-    pn(2)
     lowersCentroid = lowersTopBoundarySkin.mean(axis=0)
     uppersCentroid = uppersBottomBoundarySkin.mean(axis=0)
     desiredX_Translation  = uppersCentroid
     desiredZ_Translation  = uppersCentroid
-
-    # Translation code. comment written August 24, 2020
-    pn(2)
-    pe(77)
-    print(lowersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
-    print(uppersCentroid)         # NOTE NOTE     are these centroids FINE?       -Aug 18, 2020 at 8:05 P.M.
-    print(lowersCentroid.shape)# comment written     August 18, 2020
-    print(uppersCentroid.shape)# comment written     August 18, 2020
-    pe(77)
-    pn(2)
 
     # "Move the thigh above the calves"  :
     #   Using more math jargon,   "Translate the upperLeg s.t. the 'leftLeg is whole'  "  
@@ -1260,41 +993,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     vertsWithResizedLeftLeg = deepcopy(vertsWithResizedLeftUpperLeg)
     vertsWithResizedLeftLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
     vertsWithResizedLeftLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
-    #====================================================================
-    #                                End
-    #====================================================================
-    # TODO:  put this code into func "makeLeftLeg(... , ... , ... , ...)"
-    #====================================================================
-
-    TODO_TODO_TODO_params={}
-    makeLeftLeg(TODO_TODO_TODO_params)
 
 
-    # This stub/function header was written on August 17, 2020:       -nxb
-    """
-    leftLegVerts = makeLeftLeg(  
-      resizedLeftUpperLegVerts, 
-      resizedLeftLowerLegVerts,  
-      mergingParams={"leftUpperLegParams":leftUpperLegParams, "leftLowerLegParams":leftLowerLegParams}
-    )
-    vs  = ...
-    """
-
-
-
-    """         DON'T DELETE!             this information is always always always pretty useful.
-                DON'T DELETE!             this information is always always always pretty useful.
-                DON'T DELETE!             this information is always always always pretty useful.
-                DON'T DELETE!             this information is always always always pretty useful.
-                DON'T DELETE!             this information is always always always pretty useful.
-      maxesAndMins:           NOTE: was this from "`verts`" or from "`joints`" ?   -nxb, August 14, 2020
-        {'xMax': 0.8656285,
-         'xMin': -0.8656085,
-         'yMax': 0.43483356,
-         'yMin': -1.3589503,
-         'zMax': 0.15359592,
-         'zMin': -0.1527159}
-    """
 
     #print('betas =', betas)              # betas = tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])
     #print('betas.shape =', betas.shape)  # torch.Size([1,10])

@@ -96,7 +96,7 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   yHeightValueAtThighBeforeSMPLX_BodyIsNormalizedTo1 =  leftUpperLegVerts.max()
   jointsCenteredOnOrigin = joints - origUpperLegCentroid
 
-  #Thigh height
+  # Thigh height
   if   len(origUpperLegCentroid.shape)  == 2:
     centroidY = origUpperLegCentroid[:,Y]
   elif len(origUpperLegCentroid.shape)  == 1:
@@ -165,9 +165,9 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   # Get indices of vertices between left Ankle and left Knee:
   #===========================================================
   idxsButtBottomToKnee, vertsButtBottomToKnee = filterVertsBtwn(
-    leftUpperLegVertsCenteredOnOrigin, 
+    leftUpperLegVertsCenteredOnOrigin,
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,
-    yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, 
+    yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1,
     axis='y')
   #========================================
   #========================================
@@ -1398,12 +1398,77 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #================================================================================
     #================================================================================
-    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegParams = resizedLeftSMPLX_AnkleToKnee(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
+    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegParams =resizedLeftSMPLX_AnkleToKnee(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
     vertsWithResizedLeftLowerLeg = deepcopy(vertices)
     vertsWithResizedLeftLowerLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
     #================================================================================
 
     # TODO:     leftUpperLegParams  for merging UpperLegs with lowerLegs        (in "`getResizedLeftSMPLX_UpperLeg(... , ... , ... )`")
+
+    resizedLeftUpperLegVerts, leftUpperLegIdxes, leftUpperLegParams = resizedLeftSMPLX_KneeToButtBottom(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)      # TODO: change "TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN" to      "TIM_UPPER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN
+    #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
+    pPrintVarNXB("upperLegBotY", resizedLeftUpperLegVerts[:,Y].min(), nNewlines=1, nEquals=99)
+    vertsWithResizedLeftUpperLeg = deepcopy(vertices)
+    vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
+
+    #================================================================================
+    #================================================================================
+    #================================================================================
+    #================================================================================
+    #================================================================================
+    #   start of code for prettyPrinting /
+    #     debugging /
+    #     me figuring out (roughly) what the fuck is going on
+    #       -NXB, September 5, 2020
+    #================================================================================
+    L_ANKLE_Y_HEIGHT = -1.2795366  
+    L_KNEE_Y_HEIGHT  = -0.8582508 
+    L_TOP_OF_UPPER_LEG_Y_HEIGHT = -0.58      # I "calculated" this value   "-0.58" in    Blender.  -nxb, Aug 14, 2020 
+    X,Y,Z = 0,1,2
+    MIDDLE_OF_BODY_X = 0      # **__ROUGHLY__** correct;   certainly correct enough to distinguish between the left and right lowerLegs (in t-pose with legs "fairly widely" spread)
+
+    belowButtIdxs = np.where(   
+      np.less(vertices[:,Y],   
+              L_TOP_OF_UPPER_LEG_Y_HEIGHT))[0]
+    aboveAnkleIdxs = np.where(   
+      np.greater(vertices[:,Y],   
+              L_ANKLE_Y_HEIGHT))[0]
+    leftSideOfBodyIdxs = np.where(
+      np.greater(vertices[:,X],
+              MIDDLE_OF_BODY_X))[0]
+
+    # belowButt AND aboveAnkles:
+    upperLegsVertsIdxs     = np.intersect1d(  aboveAnkleIdxs,   belowButtIdxs) 
+    leftLegsVertsIdxs = np.intersect1d(  upperLegsVertsIdxs, leftSideOfBodyIdxs) 
+
+    print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
+    set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) ).difference (
+       set(   leftLegsVertsIdxs                                        )        )))   # empty set()
+    print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
+    set(   leftLegsVertsIdxs                                        ).difference (
+      set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) )             )))   # empty set()
+    #================================================================================
+    #return leftLegsVertsIdxs
+    #================================================================================
+
+
+    #pPrintVarNXB( "any intersect between upper and lower leg? ", np.intersect1d(leftUpperLegIdxes, leftLowerLegIdxes) )      # should be '[]' .  And indeed, it was.   -nxb, 10:35 P.M., September 5, 2020
+
+    #================================================================================
+    #   end of code for prettyPrinting /
+    #     debugging /
+    #     me figuring out (roughly) what the fuck is going on
+    #       -NXB, September 5, 2020
+    #================================================================================
+    #================================================================================
+    #================================================================================
+    #================================================================================
+    #================================================================================
+
+
+
+
+
 
 
 
@@ -1413,15 +1478,11 @@ def main(model_folder, model_type='smplx', ext='npz',
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     lowerLegEndsY = resizedLeftLowerLegVerts[:,Y].max()    # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )         
-
-    resizedLeftUpperLegVerts, leftUpperLegIdxes, leftUpperLegParams = resizedLeftSMPLX_KneeToButtBottom(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES) # TODO: change "TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN" to      "TIM_UPPER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN
-    #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
-    vertsWithResizedLeftUpperLeg = deepcopy(vertices)
-    vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
-
+    pPrintVarNXB("lowerLegTopY", lowerLegEndsY, nNewlines=1, nEquals=99)
+    pPrintVarNXB("lowerLegTopY", lowerLegEndsY, nNewlines=1, nEquals=99)
 
     lowerLegHeightMagnitude = resizedLeftLowerLegVerts[:,Y].max() - resizedLeftLowerLegVerts[:,Y].min()
-    upperLegHeightMagnitude = resizedLeftUpperLegVerts[:,Y].max() - resizedLeftUpperLegVerts[:,Y].min()    # TODO:  remove the "min()" call (min() should always be 0)        -nxb;   August, 18, 2020
+    upperLegHeightMagnitude = resizedLeftUpperLegVerts[:,Y].max() - resizedLeftUpperLegVerts[:,Y].min()      # TODO:  remove the "min()" call (min() should always be 0)        -nxb;     August 18, 2020
     LOWER_LEG_____BOUNDARY_SKIN_END_CONST = lowerLegHeightMagnitude / 10  # TODO: fiddle with this LOWER_...CONST.
     UPPER_LEG_____BOUNDARY_SKIN_END_CONST = upperLegHeightMagnitude / 10  # TODO: fiddle with this UPPER_...CONST.
     lowersTopBoundarySkinIdxs = np.where(
@@ -1443,8 +1504,6 @@ def main(model_folder, model_type='smplx', ext='npz',
     # OR,  more technically, resizedLeftUpperLegVerts[uppersBottomBoundarySkinIdxs, : ]     -August 18, 2020
     lowersCentroid = lowersTopBoundarySkin.mean(axis=0)
     uppersCentroid = uppersBottomBoundarySkin.mean(axis=0)
-    desiredX_Translation  = uppersCentroid
-    desiredZ_Translation  = uppersCentroid
 
     # "Move the thigh above the calves"  :
     #   Using more math jargon,   "Translate the upperLeg s.t. the 'leftLeg is whole'  "  
@@ -1462,11 +1521,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     vertsWithResizedLeftLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
 
 
-
-    #print('betas =', betas)              # betas = tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])
-    #print('betas.shape =', betas.shape)  # torch.Size([1,10])
+    #print('betas =', betas)     # betas = tensor([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]])   #print('betas.shape =', betas.shape)  # torch.Size([1,10])
     print('Vertices shape =', vertices.shape) # (10475,3)
-    #print('Vertices type =', type(vertices)  ) # "numpy.ndarray" ;   I'm like 90% sure)    
     timestamp= datetime.datetime.now().strftime('%Y_%m_%d____%H:%M_%p__')
 
     #===================================================================================================

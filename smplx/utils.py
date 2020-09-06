@@ -122,7 +122,7 @@ def filterVertsBtwn(verts, min_, max_, axis='y'):
 
 def pn(n=0):  print('\n'*n) # Aug 18, 2020
 def pe(n=89): print('='*n)  # Aug 18, 2020
-def pPrintVarNXB(var, varName, nNewlines=2, nEquals=99):
+def pPrintVarNXB(varName, var, nNewlines=2, nEquals=99):
     pn(nNewlines)
     pe(nEquals)
     #print("m: ")

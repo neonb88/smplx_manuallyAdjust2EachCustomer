@@ -97,6 +97,8 @@ def filterVertsBtwn(verts, min_, max_, axis='y'):
   aboveMinIdxs = np.where(   
     np.greater(verts[:,whichColumn],   
             min_))[0]   
+  pPrintVarNXB("belowMaxIdxs: ", belowMaxIdxs)
+  pPrintVarNXB("aboveMinIdxs: ", aboveMinIdxs)
   # NOTE: above, "0" is just which element of the output of 
   #   "`np.where(...)`"  the indices are in.  
   #   The output of np.where() is a tuple.

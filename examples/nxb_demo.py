@@ -166,23 +166,51 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   #===========================================================
   idxsButtBottomToKnee, vertsButtBottomToKnee = filterVertsBtwn(
     leftUpperLegVertsCenteredOnOrigin, 
-    yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, 
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,
+    yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, 
     axis='y')
+  #========================================
+  #========================================
+  #========================================
+  #========================================
+  #========================================
+  # {    begin print debugging statements:
+  #========================================
+  import sys
+  print('\n' +   '='*99+'\nwithin func {}'.format(sys._getframe().f_code.co_name) + '\n'+'='*99)
+  pPrintVarNXB('leftUpperLegVertsCenteredOnOrigin.shape', leftUpperLegVertsCenteredOnOrigin.shape, nNewlines=1)
+  pPrintVarNXB('idxsButtBottomToKnee' , idxsButtBottomToKnee  , nNewlines=1)
+  pPrintVarNXB('vertsButtBottomToKnee', vertsButtBottomToKnee , nNewlines=1)
+  pPrintVarNXB('yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1', yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, nNewlines=1)
+  pPrintVarNXB('yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1', yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, nNewlines=1)
+  pPrintVarNXB('TimsRealKneeXWidthInches' , TimsRealKneeXWidthInches, nNewlines=1)
+  pPrintVarNXB('TimsRealThighXWidthInches', TimsRealThighXWidthInches, nNewlines=1)
+  pPrintVarNXB('TimsRealKneeZDepthInches' , TimsRealKneeZDepthInches, nNewlines=1)
+  pPrintVarNXB('TimsRealThighZDepthInches', TimsRealThighZDepthInches, nNewlines=1)
+  #========================================
+  #      end print debugging statements: }
+  #========================================
+  #========================================
+  #========================================
+  #========================================
+  #========================================
+
   # Scale vertices between ButtBottom and Knee :
   leftUpperLegVertsCenteredOnOrigin[idxsButtBottomToKnee]  = scaleLegLinearlyWithYHeight(
     vertsButtBottomToKnee, 
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, 
     yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, 
+    #4.125,     # KneeX
     TimsRealKneeXWidthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
     TimsRealThighXWidthInches, 
+    #4.75,      # KneeZ
     TimsRealKneeZDepthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
     TimsRealThighZDepthInches)   # FIXME:     there's a lot of crap in here that should be changed.     -nxb on August 28, 2020      at 1:15 P.M. EDT
 
-  #========================================================================
-  # TODO:  write in calf and thigh indices and real measurements in inches
-  #     -nxb, August 31, 2020
-  #========================================================================
+  #=========================================================================
+  # TODO:  write in calf and thigh indices and real measurements in inches |
+  #     -nxb, August 31, 2020                                              |
+  #=========================================================================
 
   # Translate:
   #   Translate back to original centroid: 
@@ -1085,7 +1113,7 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   jointsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z
 
   # FIXME:   these measurements are actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
-  NXBsRealCalfXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
+  NXBsRealKneeXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
   NXBsRealKneeZDepthInches  = TimsRealCalfZDepthInches=  customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
   NXBsRealAnkleXWidthInches = TimsRealAnkleXWidthInches = customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
   NXBsRealAnkleZDepthInches = TimsRealAnkleZDepthInches = customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
@@ -1109,13 +1137,17 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,
     axis='y')
   # Scale vertices between Ankle and Calf :
+  #  NOW:
+  # Scale vertices between Knee  and Calf :
   leftLowerLegVertsCenteredOnOrigin[idxsAnkleToKnee]  = scaleLegLinearlyWithYHeight(
     vertsAnkleToKnee, 
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, 
     yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, 
-    TimsRealCalfXWidthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
+    #4.125,   # KneeX
+    NXBsRealKneeXWidthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
     TimsRealAnkleXWidthInches, 
-    TimsRealCalfZDepthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
+    #4.75,    # KneeZ
+    NXBsRealKneeZDepthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
     TimsRealAnkleZDepthInches)   # FIXME:     there's a lot of crap in here that should be changed.     -nxb on August 28, 2020      at 1:15 P.M. EDT
 
   #========================================================================
@@ -1129,7 +1161,7 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   finalResizedLeftLowerLegVertsTranslatedBack = leftLowerLegVertsCenteredOnOrigin + origLowerLegCentroid
   # Set yMin to 0:        (see docstring for more details)
   finalResizedLeftLowerLegVertsTranslatedBack[:,Y] -=  finalResizedLeftLowerLegVertsTranslatedBack[:,Y].min()
-
+ 
   leftLowerLegXYZScaleParams = {  # TODO:  copy all this for UpperLeg.   (-nxb; August 19, 2020)
     'X' : customerEstimatedMaxLowerLegWidthInches_X / currHeightX,
     'Y' : customerEstimatedLowerLegLenInches        / currHeightY,
@@ -1563,8 +1595,10 @@ def main(model_folder, model_type='smplx', ext='npz',
         o3d.visualization.draw_geometries([mesh])
     else:
         raise ValueError('Unknown plotting_module: {}'.format(plotting_module))
+#========================================================================================
 
 
+#========================================================================================
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='SMPL-X Demo')
 
@@ -1602,6 +1636,7 @@ if __name__ == '__main__':
          gender=gender, plot_joints=plot_joints,
          plotting_module=plotting_module,
          use_face_contour=use_face_contour)
+#========================================================================================
 
 
 

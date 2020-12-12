@@ -109,19 +109,19 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   #     NOTE:  (UpperLegLen is ALMOST exactly "`Y`," but not **__QUITE__**)
   #     NOTE: maintains proportions of UpperLeg;   **doesn't lose information**    -nxb; August 14, 2020
   #====================================================================================
-  currHeightX = leftUpperLegVertsCenteredOnOrigin[:,X].max() - leftUpperLegVertsCenteredOnOrigin[:,X].min()
-  currHeightY = leftUpperLegVertsCenteredOnOrigin[:,Y].max() - leftUpperLegVertsCenteredOnOrigin[:,Y].min()
-  currHeightZ = leftUpperLegVertsCenteredOnOrigin[:,Z].max() - leftUpperLegVertsCenteredOnOrigin[:,Z].min()
-  leftUpperLegVertsCenteredOnOrigin[:,X] /= currHeightX
-  leftUpperLegVertsCenteredOnOrigin[:,Y] /= currHeightY
-  leftUpperLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
+  xWidthBeforeAnyScaling_atTheBeginningOfThisFunction = leftUpperLegVertsCenteredOnOrigin[:,X].max() - leftUpperLegVertsCenteredOnOrigin[:,X].min()
+  yHeightBeforeAnyScaling_atTheBeginningOfThisFunction = leftUpperLegVertsCenteredOnOrigin[:,Y].max() - leftUpperLegVertsCenteredOnOrigin[:,Y].min()
+  zDepthBeforeAnyScaling_atTheBeginningOfThisFunction = leftUpperLegVertsCenteredOnOrigin[:,Z].max() - leftUpperLegVertsCenteredOnOrigin[:,Z].min()
+  leftUpperLegVertsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftUpperLegVertsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftUpperLegVertsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
 
   # Just to derive ThighY:   -nxb, August 31, 2020
-  yHeightButtBottomCenteredOnOrigin /= currHeightY
+  yHeightButtBottomCenteredOnOrigin /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
 
-  jointsCenteredOnOrigin[:,X] /= currHeightX
-  jointsCenteredOnOrigin[:,Y] /= currHeightY
-  jointsCenteredOnOrigin[:,Z] /= currHeightZ
+  jointsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
+  jointsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  jointsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
   # Here the upperLeg is weird-and-FAT-looking b/c its width is 1 while its height is also 1.     (sanity check)
   #                         -nxb, August 17, 2020
 
@@ -220,9 +220,9 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   finalResizedLeftUpperLegVertsTranslatedBack[:,Y] -=  finalResizedLeftUpperLegVertsTranslatedBack[:,Y].min()
 
   leftUpperLegXYZScaleParams = {  # TODO:  copy all this for UpperLeg.   (-nxb; August 19, 2020)
-    'X' : customerEstimatedMaxUpperLegWidthInches_X / currHeightX,
-    'Y' : customerEstimatedUpperLegLenInches        / currHeightY,
-    'Z' : customerEstimatedMaxUpperLegDepthInches_Z / currHeightZ,
+    'X' : customerEstimatedMaxUpperLegWidthInches_X / xWidthBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'Y' : customerEstimatedUpperLegLenInches        / yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'Z' : customerEstimatedMaxUpperLegDepthInches_Z / zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
   }
 
   #======================================================================================================
@@ -280,12 +280,12 @@ def getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches, c
   #   Normalize UpperLegLen to 1:
   #     NOTE:  (UpperLegLen is ALMOST exactly "`Y`," but not **__QUITE__**)
   #     NOTE: maintains proportions of UpperLeg;   **doesn't lose information**    -nxb; August 14, 2020
-  currHeightX = leftUpperLegVertsCenteredOnOrigin[:,X].max() - leftUpperLegVertsCenteredOnOrigin[:,X].min()
-  currHeightY = leftUpperLegVertsCenteredOnOrigin[:,Y].max() - leftUpperLegVertsCenteredOnOrigin[:,Y].min()
-  currHeightZ = leftUpperLegVertsCenteredOnOrigin[:,Z].max() - leftUpperLegVertsCenteredOnOrigin[:,Z].min()
-  leftUpperLegVertsCenteredOnOrigin[:,X] /= currHeightX
-  leftUpperLegVertsCenteredOnOrigin[:,Y] /= currHeightY
-  leftUpperLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
+  xWidthBeforeAnyScaling_atTheBeginningOfThisFunction = leftUpperLegVertsCenteredOnOrigin[:,X].max() - leftUpperLegVertsCenteredOnOrigin[:,X].min()
+  yHeightBeforeAnyScaling_atTheBeginningOfThisFunction = leftUpperLegVertsCenteredOnOrigin[:,Y].max() - leftUpperLegVertsCenteredOnOrigin[:,Y].min()
+  zDepthBeforeAnyScaling_atTheBeginningOfThisFunction = leftUpperLegVertsCenteredOnOrigin[:,Z].max() - leftUpperLegVertsCenteredOnOrigin[:,Z].min()
+  leftUpperLegVertsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftUpperLegVertsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftUpperLegVertsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
   #========================================================================================
   # Here the UpperLeg (AKA thigh) is weird-and-FAT-looking b/c its width is 1 while its height is also 1.
   #                         -nxb, August 17, 2020
@@ -1035,6 +1035,9 @@ def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
 #       # we don't have this variable "`customerEstimatedLowerLegLenInches`"  , 
 #==================================================
 def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, customerEstimatedMaxLowerLegWidthInches_X, customerEstimatedMaxLowerLegDepthInches_Z):
+  # NOTE: docstring is a few lines down.    -nxb, Dec. 11, 2020
+
+
   #========================================================================
   # TODO:  write in calf and thigh indices and real measurements in inches
   #     -nxb, August 31, 2020
@@ -1043,18 +1046,50 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   # NOTE:   even with "`pyrender.show()`" ,   this code is fairly performant.   (about 5 secs.   O(5 seconds)   )       At least while I'm only scaling the LowerLeg, most of the time is spent on file-IO rather than in this method.
   # TODO: update the docstring.
   '''
-    docstring
-    docstring
+    @author nxb
+    @since Dec. 11, 2020
 
     @param vertices
     @param joints
-    TODO: docstring
+
+    The parameters passed into the function (like "customerEstimatedLowerLegLenInches", "customerEstimatedMaxLowerLegWidthInches_X", "customerEstimatedMaxLowerLegDepthInches_Z", and "customerEstimatedHeightInches") are not consistently used throughout this function; there are other parameters from "global function stores" that are used for parts of the function instead.
+
+    As of Dec. 11, 2020, this method ("resizedLeftSMPLX_AnkleToKnee") does NOT stretch according to realCalfX and realCalfZ.
+      Doesn't do calves
+
+
+    Summary of this method:
+      (as of Dec. 11, 2020)
+      ("this method" was called "resizedLeftSMPLX_AnkleToKnee" as of Dec. 11, 2020)
+
+      1.  Pick the indices of "leftLowerLeg" out of the bigger variable "vertices" which contains the whole SMPL-X body's vertices
+        a.  Func is called "leftLowerLegIndices()"
+        b.
+      2.  Center the lowerLeg's centroid on (0,0,0)
+      3.  Scale down all dimensions (x, y, and z) to magnitude 1
+      4.  Scale up to customer's real leftLowerLeg dimensions
+        a.
+      5.  Do everything required to scale the joints and constantly have the joints in the right place, so we can split the leg(s) around
+        a.  Center on origin
+        b.  Scale down to 1
+        c.  Scale up again to "real" positions
+        d.
+        e.
+      6.  Get indices between left ankle and left knee
+      7.  "scaleLegLinearlyWithYHeight" for the ankle-to-calf and
+      8.  "scaleLegLinearlyWithYHeight" for the calf-to-knee section of the "lowerLeg" AKA tibia
+      9.  translate to the ORIGINAL centroid of the leftLowerLeg   (ie. x and z locs too)
+      10.   translate to yMin  ==  0
+      11.   return how much we stretched the leg in x, y, and z?  Not 100% sure what's going on with the return value; maybe I had some clear idea for what that was supposed to do when I wrote it longer than 1 month ago, but now idk
+      12.
+      13.
+
   '''
 
   #===================================================================================================
   #   As of August 31, 2020   the function header was entitled:
   #===================================================================================================
-  # def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
+  #   def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):
   #===================================================================================================
   X,Y,Z=0,1,2
 
@@ -1077,16 +1112,30 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   #     NOTE:  (lowerLegLen is ALMOST exactly "`Y`," but not **__QUITE__**)
   #     NOTE: maintains proportions of lowerLeg;   **doesn't lose information**    -nxb; August 14, 2020
   #====================================================================================
-  currHeightX = leftLowerLegVertsCenteredOnOrigin[:,X].max() - leftLowerLegVertsCenteredOnOrigin[:,X].min()
-  currHeightY = leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
-  currHeightZ = leftLowerLegVertsCenteredOnOrigin[:,Z].max() - leftLowerLegVertsCenteredOnOrigin[:,Z].min()
-  leftLowerLegVertsCenteredOnOrigin[:,X] /= currHeightX
-  leftLowerLegVertsCenteredOnOrigin[:,Y] /= currHeightY
-  leftLowerLegVertsCenteredOnOrigin[:,Z] /= currHeightZ
+  xWidthBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,X].max() - leftLowerLegVertsCenteredOnOrigin[:,X].min()
+  yHeightBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
+  zDepthBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,Z].max() - leftLowerLegVertsCenteredOnOrigin[:,Z].min()
 
-  jointsCenteredOnOrigin[:,X] /= currHeightX
-  jointsCenteredOnOrigin[:,Y] /= currHeightY
-  jointsCenteredOnOrigin[:,Z] /= currHeightZ
+  # Normalize to 1:
+  leftLowerLegVertsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftLowerLegVertsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftLowerLegVertsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
+
+  # Get knee verts:
+  kneeTopY = leftLowerLegVertsCenteredOnOrigin[:,Y].max(),
+  kneeBotY = kneeTopY - 0.1*yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftKneeVertsCenteredOnOrigin = filterVertsBtwn(leftLowerLegVertsCenteredOnOrigin, kneeBotY, kneeTopY, axis='y')
+
+  # Get xWidth of knee:
+  xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction = leftKneeVertsCenteredOnOrigin[:,X].max() - leftKneeVertsCenteredOnOrigin[:,X].min()
+
+  # Get zDepth of knee:
+  zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction = leftKneeVertsCenteredOnOrigin[:,Z].max() - leftKneeVertsCenteredOnOrigin[:,Z].min()
+
+
+  jointsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
+  jointsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  jointsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
   # Here the lowerLeg is weird-and-FAT-looking b/c its width is 1 while its height is also 1.     (sanity check)
   #                         -nxb, August 17, 2020
 
@@ -1108,9 +1157,12 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   #     THAT'S why I commented the "old code" out
 
   # Also scale up 'joints' :
+  #      TODO: this should be updated s.t. wherever the joint is is scaled linearly between yBot and yTop, like in "scaleLegLinearlyWithYHeight"
+  #      TODO: this should be updated s.t. wherever the joint is is scaled linearly between yBot and yTop, like in "scaleLegLinearlyWithYHeight"
   jointsCenteredOnOrigin[:,X] *= customerEstimatedMaxLowerLegWidthInches_X
   jointsCenteredOnOrigin[:,Y] *= customerEstimatedLowerLegLenInches
   jointsCenteredOnOrigin[:,Z] *= customerEstimatedMaxLowerLegDepthInches_Z
+  #      TODO: this should be updated s.t. wherever the joint is is scaled linearly between yBot and yTop, like in "scaleLegLinearlyWithYHeight"
 
   # FIXME:   these measurements are actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
   NXBsRealKneeXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
@@ -1136,9 +1188,18 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
     yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, 
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,
     axis='y')
+  #  TODO Scale vertices between Ankle and Calf :
   # Scale vertices between Ankle and Calf :
-  #  NOW:
+  #  TODO Scale vertices between Ankle and Calf :
+  # [insert code here]
+  # [insert code here]
+
   # Scale vertices between Knee  and Calf :
+  #  TODO Scale vertices between Knee and Calf :
+  # [insert code here]
+  # [insert code here]
+
+  # Scale vertices between Ankle and Knee :
   leftLowerLegVertsCenteredOnOrigin[idxsAnkleToKnee]  = scaleLegLinearlyWithYHeight(
     vertsAnkleToKnee, 
     yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, 
@@ -1163,16 +1224,18 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   finalResizedLeftLowerLegVertsTranslatedBack[:,Y] -=  finalResizedLeftLowerLegVertsTranslatedBack[:,Y].min()
  
   leftLowerLegXYZScaleParams = {  # TODO:  copy all this for UpperLeg.   (-nxb; August 19, 2020)
-    'X' : customerEstimatedMaxLowerLegWidthInches_X / currHeightX,
-    'Y' : customerEstimatedLowerLegLenInches        / currHeightY,
-    'Z' : customerEstimatedMaxLowerLegDepthInches_Z / currHeightZ,
-  }
-
-  #======================================================================================================
-  #======================================================================================================
-  #======================================================================================================
-  #======================================================================================================
-
+    'X' : customerEstimatedMaxLowerLegWidthInches_X / xWidthBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'Y' : customerEstimatedLowerLegLenInches        / yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'Z' : customerEstimatedMaxLowerLegDepthInches_Z / zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'xWidthAtKnee':   customersKneeXWidthInches()   / xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction,
+    'yHeightAtKnee':  customerEstimatedHeightInches / yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'zDepthAtKnee':   customersKneeZDepthInches()   / zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction,
+    # TODO: proper "ankle-foot-boundary" resizing
+    # TODO: proper "ankle-foot-boundary" resizing
+    #'X_AtBot_Ankle': customersAnkleXWidthInches()   / xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction, # TODO: proper "ankle-foot-boundary" resizing
+    # TODO: proper "ankle-foot-boundary" resizing
+    # TODO: proper "ankle-foot-boundary" resizing
+  } # TODO
 
   return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, leftLowerLegXYZScaleParams # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "resizedLeftSMPLX_AnkleToKnee(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
 #================================================== end function def of   "resizedLeftSMPLX_AnkleToKnee(vertices, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, customerEstimatedMaxLowerLegWidthInches_X,  customerEstimatedMaxLowerLegDepthInches_Z):    # we don't have this customerEstimatedLowerLegLenInches, ==================================================
@@ -1398,14 +1461,43 @@ def main(model_folder, model_type='smplx', ext='npz',
     #================================================================================
     #================================================================================
     #================================================================================
-    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegParams =resizedLeftSMPLX_AnkleToKnee(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
+
+    # Get 2 verts so we can re-translate :
+
+    L_KNEE_Y_HEIGHT  = -0.8582508 
+    # Lower left leg:
+    idxsBelowKnee, vertsBelowKnee = filterVertsBtwn(vertices, -float('inf'), L_KNEE_Y_HEIGHT, axis='y')
+    idxsLeftSideBelowKnee, vertsLeftSideBelowKnee = filterVertsBtwn(vertsBelowKnee, 0, float('inf'),  axis='x')
+    vertHighestLeftSideBelowKnee = vertsLeftSideBelowKnee[ np.argmax(  vertsLeftSideBelowKnee[:,Y])]
+
+    # Upper left leg:
+    #   NOTE: we're getting the upperLegVert that's CLOSEST to "L_KNEE_Y_HEIGHT" in ***Y*** rather than adjacent to this leftTibiaVert that we got.
+    idxsAboveKnee, vertsAboveKnee = filterVertsBtwn(vertices, L_KNEE_Y_HEIGHT, float('inf'), axis='y')
+    idxsLeftSideAboveKnee, vertsLeftSideAboveKnee = filterVertsBtwn(vertsAboveKnee, 0, float('inf'),  axis='x')
+    vertLowestLeftSideAboveKnee = vertsLeftSideAboveKnee[ np.argmin(  vertsLeftSideAboveKnee[:,Y])]
+
+    # above - below => positiveY_Value
+    origDiff = vertLowestLeftSideAboveKnee - vertHighestLeftSideBelowKnee
+
+    resizedLeftLowerLegVerts, leftLowerLegIdxes, leftLowerLegScaleParams = resizedLeftSMPLX_AnkleToKnee(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)
     vertsWithResizedLeftLowerLeg = deepcopy(vertices)
     vertsWithResizedLeftLowerLeg[leftLowerLegIdxes] = resizedLeftLowerLegVerts
     #================================================================================
-
     # TODO:     leftUpperLegParams  for merging UpperLegs with lowerLegs        (in "`getResizedLeftSMPLX_UpperLeg(... , ... , ... )`")
-
     resizedLeftUpperLegVerts, leftUpperLegIdxes, leftUpperLegParams = resizedLeftSMPLX_KneeToButtBottom(vertices, joints, TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN, TIM_SELF_REPORTED_HEIGHT_INCHES, NXB_LOWER_LEG_WIDTH_AKA_X_INCHES, NXB_LOWER_LEG_DEPTH_AKA_Z_INCHES)      # TODO: change "TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN" to      "TIM_UPPER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN
+
+    # Scale "origDiff" in x, y, and z   to find the amount of "translationDelta" where the upperLeg SHOULD BE relative to the lowerLeg:
+    #   upperLeg **__should__** be ABOVE the lowerLeg
+
+    # Scale x:
+    outputDiff    = origDiff
+    outputDiff[X]*= leftLowerLegScaleParams['xWidthAtKnee']
+    outputDiff[Y]*= leftLowerLegScaleParams['yHeightAtKnee']
+    outputDiff[Z]*= leftLowerLegScaleParams['zDepthAtKnee']
+
+
+
+
     #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
     pPrintVarNXB("upperLegBotY", resizedLeftUpperLegVerts[:,Y].min(), nNewlines=1, nEquals=99)
     vertsWithResizedLeftUpperLeg = deepcopy(vertices)
@@ -1438,8 +1530,8 @@ def main(model_folder, model_type='smplx', ext='npz',
               MIDDLE_OF_BODY_X))[0]
 
     # belowButt AND aboveAnkles:
-    upperLegsVertsIdxs     = np.intersect1d(  aboveAnkleIdxs,   belowButtIdxs) 
-    leftLegsVertsIdxs = np.intersect1d(  upperLegsVertsIdxs, leftSideOfBodyIdxs) 
+    upperLegsVertsIdxs  = np.intersect1d( aboveAnkleIdxs,     belowButtIdxs) 
+    leftLegsVertsIdxs   = np.intersect1d( upperLegsVertsIdxs, leftSideOfBodyIdxs) 
 
     print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
     set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) ).difference (
@@ -1478,7 +1570,6 @@ def main(model_folder, model_type='smplx', ext='npz',
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     lowerLegEndsY = resizedLeftLowerLegVerts[:,Y].max()    # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )         
-    pPrintVarNXB("lowerLegTopY", lowerLegEndsY, nNewlines=1, nEquals=99)
     pPrintVarNXB("lowerLegTopY", lowerLegEndsY, nNewlines=1, nEquals=99)
 
     lowerLegHeightMagnitude = resizedLeftLowerLegVerts[:,Y].max() - resizedLeftLowerLegVerts[:,Y].min()
@@ -1650,7 +1741,7 @@ def main(model_folder, model_type='smplx', ext='npz',
 
         o3d.visualization.draw_geometries([mesh])
     else:
-        raise ValueError('Unknown plotting_module: {}'.format(plotting_module))
+        raise ValueError('Unknown plotting_module: {}'.format(plotting_module)  )
 #========================================================================================
 
 

@@ -21,6 +21,7 @@ from __future__ import division
 import numpy as np
 import torch
 
+debug=False
 
 def to_tensor(array, dtype=torch.float32):
     if 'torch.tensor' not in str(type(array)):
@@ -97,8 +98,9 @@ def filterVertsBtwn(verts, min_, max_, axis='y'):
   aboveMinIdxs = np.where(   
     np.greater(verts[:,whichColumn],   
             min_))[0]   
-  pPrintVarNXB("belowMaxIdxs: ", belowMaxIdxs)
-  pPrintVarNXB("aboveMinIdxs: ", aboveMinIdxs)
+  if debug:
+    pPrintVarNXB("belowMaxIdxs: ", belowMaxIdxs)
+    pPrintVarNXB("aboveMinIdxs: ", aboveMinIdxs)
   # NOTE: above, "0" is just which element of the output of 
   #   "`np.where(...)`"  the indices are in.  
   #   The output of np.where() is a tuple.

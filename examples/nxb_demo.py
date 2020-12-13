@@ -36,6 +36,8 @@ import smplx
 import datetime # added by nxb, August 13, 2020
 from copy import deepcopy # Aug 14, 2020
 
+debug=False
+
 # pe and pn:
 #from utils import pe, pn # Aug 18, 2020
 def pn(n=0):  print('\n'*n) # Aug 18, 2020
@@ -158,8 +160,9 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   LEFT_KNEE   = 4 # TODO: double-check this indexing?  (1-based vs. 0-based)
   yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = jointsCenteredOnOrigin[LEFT_KNEE  , Y]    #  8.715
   yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1  = yHeightButtBottomCenteredOnOrigin
-  pPrintVarNXB("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:",  yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,  nNewlines=2, nEquals=len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:")+4)   #  8.715
-  pPrintVarNXB("yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1:", yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1:")+4)  # -9.393 FIXME: this is old.  -nxb, August 31, 2020 at 7:53 P.M.
+  if debug:
+    pPrintVarNXB("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:",  yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,  nNewlines=2, nEquals=len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:")+4)   #  8.715
+    pPrintVarNXB("yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1:", yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1:")+4)  # -9.393 FIXME: this is old.  -nxb, August 31, 2020 at 7:53 P.M.
 
   #===========================================================
   # Get indices of vertices between left Ankle and left Knee:
@@ -177,16 +180,17 @@ def resizedLeftSMPLX_KneeToButtBottom(vertices, joints, customerEstimatedUpperLe
   # {    begin print debugging statements:
   #========================================
   import sys
-  print('\n' +   '='*99+'\nwithin func {}'.format(sys._getframe().f_code.co_name) + '\n'+'='*99)
-  pPrintVarNXB('leftUpperLegVertsCenteredOnOrigin.shape', leftUpperLegVertsCenteredOnOrigin.shape, nNewlines=1)
-  pPrintVarNXB('idxsButtBottomToKnee' , idxsButtBottomToKnee  , nNewlines=1)
-  pPrintVarNXB('vertsButtBottomToKnee', vertsButtBottomToKnee , nNewlines=1)
-  pPrintVarNXB('yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1', yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, nNewlines=1)
-  pPrintVarNXB('yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1', yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, nNewlines=1)
-  pPrintVarNXB('TimsRealKneeXWidthInches' , TimsRealKneeXWidthInches, nNewlines=1)
-  pPrintVarNXB('TimsRealThighXWidthInches', TimsRealThighXWidthInches, nNewlines=1)
-  pPrintVarNXB('TimsRealKneeZDepthInches' , TimsRealKneeZDepthInches, nNewlines=1)
-  pPrintVarNXB('TimsRealThighZDepthInches', TimsRealThighZDepthInches, nNewlines=1)
+  if debug:
+    print('\n' +   '='*99+'\nwithin func {}'.format(sys._getframe().f_code.co_name) + '\n'+'='*99)
+    pPrintVarNXB('leftUpperLegVertsCenteredOnOrigin.shape', leftUpperLegVertsCenteredOnOrigin.shape, nNewlines=1)
+    pPrintVarNXB('idxsButtBottomToKnee' , idxsButtBottomToKnee  , nNewlines=1)
+    pPrintVarNXB('vertsButtBottomToKnee', vertsButtBottomToKnee , nNewlines=1)
+    pPrintVarNXB('yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1', yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, nNewlines=1)
+    pPrintVarNXB('yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1', yHeightValueAtButtBottomWithSMPLX_BodyNormalizedTo1, nNewlines=1)
+    pPrintVarNXB('TimsRealKneeXWidthInches' , TimsRealKneeXWidthInches, nNewlines=1)
+    pPrintVarNXB('TimsRealThighXWidthInches', TimsRealThighXWidthInches, nNewlines=1)
+    pPrintVarNXB('TimsRealKneeZDepthInches' , TimsRealKneeZDepthInches, nNewlines=1)
+    pPrintVarNXB('TimsRealThighZDepthInches', TimsRealThighZDepthInches, nNewlines=1)
   #========================================
   #      end print debugging statements: }
   #========================================
@@ -401,9 +405,10 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
     b = yInterceptOnTheGraph = zDepthAtTopYHeight_RealCustomerInches - (m*yTop)
     zScaling = m*yVal + b # again, not quite y = m*x+b.  See thorougher documentation after the function for reasoning -August 24, 2020. 
     verts_[i,Z] *= zScaling
-    pPrintVarNXB(m, "m", nNewlines=1, nEquals=99)
-    pPrintVarNXB(xScaling, "xScaling", nNewlines=1, nEquals=99)
-    pPrintVarNXB(zScaling, "zScaling", nNewlines=1, nEquals=99)
+    if debug:
+      pPrintVarNXB(m, "m", nNewlines=1, nEquals=99)
+      pPrintVarNXB(xScaling, "xScaling", nNewlines=1, nEquals=99)
+      pPrintVarNXB(zScaling, "zScaling", nNewlines=1, nEquals=99)
     # why are both xScaling and zScaling== 5.0?     -nxb, August 28, at 1:53 P.M.
   #============================================
   #end "for i, yVal in enumerate(verts_[:,Y]):"
@@ -1116,15 +1121,10 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   yHeightBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
   zDepthBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,Z].max() - leftLowerLegVertsCenteredOnOrigin[:,Z].min()
 
-  # Normalize to 1:
-  leftLowerLegVertsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
-  leftLowerLegVertsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
-  leftLowerLegVertsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
-
   # Get knee verts:
   kneeTopY = leftLowerLegVertsCenteredOnOrigin[:,Y].max(),
   kneeBotY = kneeTopY - 0.1*yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
-  leftKneeVertsCenteredOnOrigin = filterVertsBtwn(leftLowerLegVertsCenteredOnOrigin, kneeBotY, kneeTopY, axis='y')
+  idxs, leftKneeVertsCenteredOnOrigin = filterVertsBtwn(leftLowerLegVertsCenteredOnOrigin, kneeBotY, kneeTopY, axis='y') # TODO: rename "idxs"    -nxb, Dec. 13, at 12:52 A.M.
 
   # Get xWidth of knee:
   xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction = leftKneeVertsCenteredOnOrigin[:,X].max() - leftKneeVertsCenteredOnOrigin[:,X].min()
@@ -1132,6 +1132,10 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   # Get zDepth of knee:
   zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction = leftKneeVertsCenteredOnOrigin[:,Z].max() - leftKneeVertsCenteredOnOrigin[:,Z].min()
 
+  # Normalize to 1:
+  leftLowerLegVertsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftLowerLegVertsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
+  leftLowerLegVertsCenteredOnOrigin[:,Z] /= zDepthBeforeAnyScaling_atTheBeginningOfThisFunction
 
   jointsCenteredOnOrigin[:,X] /= xWidthBeforeAnyScaling_atTheBeginningOfThisFunction
   jointsCenteredOnOrigin[:,Y] /= yHeightBeforeAnyScaling_atTheBeginningOfThisFunction
@@ -1177,8 +1181,9 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   LEFT_ANKLE  = 7   # see   "`/home/nathan_bendich/Dropbox/vr_mall_backup/IMPORTANT/smplx_manuallyAdjust2EachCustomer/smplx/joint_names.py`"  for details.
   yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = jointsCenteredOnOrigin[LEFT_KNEE  , Y]    #  8.715
   yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1  = jointsCenteredOnOrigin[LEFT_ANKLE , Y]    # -9.715
-  pPrintVarNXB("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:", yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:")+4)     #  8.715
-  pPrintVarNXB("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1:", yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1:")+4)  # -9.393
+  if debug:
+    pPrintVarNXB("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:", yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1:")+4)     #  8.715
+    pPrintVarNXB("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1:", yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, nNewlines=2, nEquals=len("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1:")+4)  # -9.393
 
   #===========================================================
   # Get indices of vertices between left Ankle and left Knee:
@@ -1222,13 +1227,18 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   finalResizedLeftLowerLegVertsTranslatedBack = leftLowerLegVertsCenteredOnOrigin + origLowerLegCentroid
   # Set yMin to 0:        (see docstring for more details)
   finalResizedLeftLowerLegVertsTranslatedBack[:,Y] -=  finalResizedLeftLowerLegVertsTranslatedBack[:,Y].min()
- 
+
+  print("\n"*3 +\
+    "="*99)
+  print("xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction:\n  {}".format(xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction))
+  print("yHeightBeforeAnyScaling_atTheBeginningOfThisFunction:\n  {}".format(yHeightBeforeAnyScaling_atTheBeginningOfThisFunction))
+  print("zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction:\n  {}".format(zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction))
   leftLowerLegXYZScaleParams = {  # TODO:  copy all this for UpperLeg.   (-nxb; August 19, 2020)
     'X' : customerEstimatedMaxLowerLegWidthInches_X / xWidthBeforeAnyScaling_atTheBeginningOfThisFunction,
     'Y' : customerEstimatedLowerLegLenInches        / yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
     'Z' : customerEstimatedMaxLowerLegDepthInches_Z / zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
     'xWidthAtKnee':   customersKneeXWidthInches()   / xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction,
-    'yHeightAtKnee':  customerEstimatedHeightInches / yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
+    'yHeightAtKnee':  customerEstimatedLowerLegLenInches/ yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
     'zDepthAtKnee':   customersKneeZDepthInches()   / zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction,
     # TODO: proper "ankle-foot-boundary" resizing
     # TODO: proper "ankle-foot-boundary" resizing
@@ -1491,15 +1501,23 @@ def main(model_folder, model_type='smplx', ext='npz',
 
     # Scale x:
     outputDiff    = origDiff
+    print("\n"*3 +\
+      "="*99)
+    print("leftLowerLegScaleParams:")
+    for k,v in leftLowerLegScaleParams.items():
+      print('{} {}'.format(k,v) )
+    print("outputDiff: {}".format(outputDiff))
     outputDiff[X]*= leftLowerLegScaleParams['xWidthAtKnee']
     outputDiff[Y]*= leftLowerLegScaleParams['yHeightAtKnee']
     outputDiff[Z]*= leftLowerLegScaleParams['zDepthAtKnee']
+    print("outputDiff, (post-'scaling'): {}".format(outputDiff))
 
 
 
 
     #getResizedLeftSMPLX_UpperLeg(vertices, customerEstimatedUpperLegLenInches,                                customerEstimatedHeightInches, prevBodyPartsXStretchingSlashScaling, prevBodyPartsZStretchingSlashScaling, TIM_UpperLeg_WIDTH_AKA_X_INCHES, TIM_UpperLeg_DEPTH_AKA_Z_INCHES):    # we don't have this customerEstimatedUpperLegLenInches, 
-    pPrintVarNXB("upperLegBotY", resizedLeftUpperLegVerts[:,Y].min(), nNewlines=1, nEquals=99)
+    if debug:
+      pPrintVarNXB("upperLegBotY", resizedLeftUpperLegVerts[:,Y].min(), nNewlines=1, nEquals=99)
     vertsWithResizedLeftUpperLeg = deepcopy(vertices)
     vertsWithResizedLeftUpperLeg[leftUpperLegIdxes] = resizedLeftUpperLegVerts
 
@@ -1533,18 +1551,17 @@ def main(model_folder, model_type='smplx', ext='npz',
     upperLegsVertsIdxs  = np.intersect1d( aboveAnkleIdxs,     belowButtIdxs) 
     leftLegsVertsIdxs   = np.intersect1d( upperLegsVertsIdxs, leftSideOfBodyIdxs) 
 
-    print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
-    set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) ).difference (
-       set(   leftLegsVertsIdxs                                        )        )))   # empty set()
-    print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
-    set(   leftLegsVertsIdxs                                        ).difference (
-      set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) )             )))   # empty set()
-    #================================================================================
-    #return leftLegsVertsIdxs
-    #================================================================================
+    if debug:
+      print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
+      set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) ).difference (
+         set(   leftLegsVertsIdxs                                        )        )))   # empty set()
+      #================================================================================================
+      print(  "Vertex indices that are in the left leg but not caught by my indexing :      {}".format(
+      set(   leftLegsVertsIdxs                                        ).difference (
+        set( np.concatenate( (leftUpperLegIdxes, leftLowerLegIdxes) ) )             )))   # empty set()
 
-
-    #pPrintVarNXB( "any intersect between upper and lower leg? ", np.intersect1d(leftUpperLegIdxes, leftLowerLegIdxes) )      # should be '[]' .  And indeed, it was.   -nxb, 10:35 P.M., September 5, 2020
+      #================================================================================================
+      pPrintVarNXB( "any intersect between upper and lower leg? ", np.intersect1d(leftUpperLegIdxes, leftLowerLegIdxes) )      # should be '[]' .  And indeed, it was.   -nxb, 10:35 P.M., September 5, 2020
 
     #================================================================================
     #   end of code for prettyPrinting /
@@ -1552,25 +1569,14 @@ def main(model_folder, model_type='smplx', ext='npz',
     #     me figuring out (roughly) what the fuck is going on
     #       -NXB, September 5, 2020
     #================================================================================
-    #================================================================================
-    #================================================================================
-    #================================================================================
-    #================================================================================
-
-
-
-
-
-
-
-
 
     # Translation code. comment written August 24, 2020
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     # TODO:  put this variable definition of "`lowerLegEndsY`" later, when I'm doing the move the upperLeg "UP,"   above the lowerLeg      (Y)
     lowerLegEndsY = resizedLeftLowerLegVerts[:,Y].max()    # I fixed this bug at 3:00 P.M. EDT on Aug 18, 2020      -nxb    ( "`min()`" ==>  "`max()`"  )         
-    pPrintVarNXB("lowerLegTopY", lowerLegEndsY, nNewlines=1, nEquals=99)
+    if debug:
+      pPrintVarNXB("lowerLegTopY", lowerLegEndsY, nNewlines=1, nEquals=99)
 
     lowerLegHeightMagnitude = resizedLeftLowerLegVerts[:,Y].max() - resizedLeftLowerLegVerts[:,Y].min()
     upperLegHeightMagnitude = resizedLeftUpperLegVerts[:,Y].max() - resizedLeftUpperLegVerts[:,Y].min()      # TODO:  remove the "min()" call (min() should always be 0)        -nxb;     August 18, 2020
@@ -1581,13 +1587,15 @@ def main(model_folder, model_type='smplx', ext='npz',
         resizedLeftLowerLegVerts[:,Y],
         lowerLegEndsY - LOWER_LEG_____BOUNDARY_SKIN_END_CONST #     (I have to do math in this line    because this is pre-translation-up-and-down)      -nxb, August 18, 2020
       ))[0]    # TODO:    rename this awkwardly named "LOWER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
-    pPrintVarNXB(lowersTopBoundarySkinIdxs, "lowersTopBoundarySkinIdxs:", nNewlines=2, nEquals=99) # comment written     August 18, 2020
+    if debug:
+      pPrintVarNXB(lowersTopBoundarySkinIdxs, "lowersTopBoundarySkinIdxs:", nNewlines=2, nEquals=99) # comment written     August 18, 2020
     uppersBottomBoundarySkinIdxs = np.where(
       np.less(
         resizedLeftUpperLegVerts[:,Y],
         UPPER_LEG_____BOUNDARY_SKIN_END_CONST))[0]    # TODO:    rename this awkwardly named "UPPER_LEG_____BOUNDARY_SKIN_END_CONST"        -nxb; August 18, 2020
-    pPrintVarNXB(uppersBottomBoundarySkinIdxs, "uppersTopBoundarySkinIdxs:", nNewlines=2, nEquals=99) # comment written     August 18, 2020
-    pPrintVarNXB(resizedLeftLowerLegVerts.shape,"resizedLeftLowerLegVerts.shape :", nNewlines=1, nEquals=77)# comment written     August 18, 2020
+    if debug:
+      pPrintVarNXB(uppersBottomBoundarySkinIdxs, "uppersTopBoundarySkinIdxs:", nNewlines=2, nEquals=99) # comment written     August 18, 2020
+      pPrintVarNXB(resizedLeftLowerLegVerts.shape,"resizedLeftLowerLegVerts.shape :", nNewlines=1, nEquals=77)# comment written     August 18, 2020
 
     # Translation code. comment written August 24, 2020
     lowersTopBoundarySkin     = resizedLeftLowerLegVerts[lowersTopBoundarySkinIdxs    ]     

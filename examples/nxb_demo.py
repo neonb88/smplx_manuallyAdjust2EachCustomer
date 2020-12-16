@@ -385,6 +385,7 @@ def scaleLegLinearlyWithYHeight(verts, yTop, yBot, xWidthAtTopYHeight_RealCustom
   #end "for i, yVal in enumerate(verts_[:,Y]):"
   #============================================
 
+  # NOTE: For now, I'm assuming that this function "scaleLegLinearlyWithYHeight" isn't the problem.  I think the problem is, instead, in some of the intermediate variables that are used to scale the leg.  If this assumption turns out to be wrong later, welp, GoodGameWellPlayed     -nxb, 8:43 P.M. on Dec. 15, 2020
   return verts_
 
     #==========================================================================================
@@ -952,7 +953,6 @@ def resizedLeftSMPLX_foot(vertices, xAnkleScaling, yAnkleScaling, zAnkleScaling)
   # Indices:
   leftFootIdxes = leftFootIndices(vertices)
   leftFootVerts = deepcopy(vertices[leftFootIdxes, : ] )
-
   # Scale:
   X,Y,Z=0,1,2
   leftFootVerts[:,X] *= xAnkleScaling
@@ -1023,7 +1023,6 @@ def resizedLeftSMPLX_foot(vertices, xAnkleScaling, yAnkleScaling, zAnkleScaling)
 def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenInches, customerEstimatedHeightInches, customerEstimatedMaxLowerLegWidthInches_X, customerEstimatedMaxLowerLegDepthInches_Z):
   # NOTE: docstring is a few lines down.    -nxb, Dec. 11, 2020
 
-
   #========================================================================
   # TODO:  write in calf and thigh indices and real measurements in inches
   #     -nxb, August 31, 2020
@@ -1042,7 +1041,6 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
 
     As of Dec. 11, 2020, this method ("resizedLeftSMPLX_AnkleToKnee") does NOT stretch according to realCalfX and realCalfZ.
       Doesn't do calves
-
 
     Summary of this method:
       (as of Dec. 11, 2020)
@@ -1069,7 +1067,6 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
       11.   return how much we stretched the leg in x, y, and z?  Not 100% sure what's going on with the return value; maybe I had some clear idea for what that was supposed to do when I wrote it longer than 1 month ago, but now idk
       12.
       13.
-
   '''
 
   #===================================================================================================
@@ -1113,9 +1110,11 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
 
   # Get xWidth of ankle:
   xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction = leftAnkleVertsCenteredOnOrigin[:,X].max() - leftAnkleVertsCenteredOnOrigin[:,X].min()
+  pPrintVarNXB("xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction", xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction, nNewlines=0)
 
   # Get zDepth of ankle:
   zDepthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction = leftAnkleVertsCenteredOnOrigin[:,Z].max() - leftAnkleVertsCenteredOnOrigin[:,Z].min()
+  pPrintVarNXB("zDepthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction", zDepthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction, nNewlines=0)
 
 
   #============
@@ -1170,10 +1169,10 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   #      TODO: this should be updated s.t. wherever the joint is is scaled linearly between yBot and yTop, like in "scaleLegLinearlyWithYHeight"
 
   # FIXME:   these measurements are actually Nathan's; (I didn't measure Tim's yet)        -nxb; August 28, 2020
-  NXBsRealKneeXWidthInches = TimsRealCalfXWidthInches  =  customersCalfXWidthInches(customerImgFname="timsFrontView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
-  NXBsRealKneeZDepthInches  = TimsRealCalfZDepthInches=  customersCalfZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
-  NXBsRealAnkleXWidthInches = TimsRealAnkleXWidthInches = customersAnkleXWidthInches(customerImgFname="timsSideView_0_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
-  NXBsRealAnkleZDepthInches = TimsRealAnkleZDepthInches = customersAnkleZDepthInches(customerImgFname="timsSideView_90_Degrees.jpg    TODO: fill in Tim's real filename locally on my Ubuntu machine", OpenPoseKPS=np.random.random((25,2)), binaryMask=np.random.random((640,480)).astype('bool') )
+  NXBsRealKneeXWidthInches  = TimsRealCalfXWidthInches  = customersCalfXWidthInches()
+  NXBsRealKneeZDepthInches  = TimsRealCalfZDepthInches  = customersCalfZDepthInches()
+  NXBsRealAnkleXWidthInches = TimsRealAnkleXWidthInches = customersAnkleXWidthInches()
+  NXBsRealAnkleZDepthInches = TimsRealAnkleZDepthInches = customersAnkleZDepthInches()
 
   # TODO: change this from "calf" to "knee" ?   Briefly (ie. today)    requires less work.     -nxb; August 28, 2020
   yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1   = -0.25     # where the Knee  is on the SMPL-X model      (y-dimension is foot to scalp)      (these were hard-coded before August 27, 2020 -nxb)
@@ -1188,8 +1187,8 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   #===========================================================
   idxsAnkleToKnee, vertsAnkleToKnee = filterVertsBtwn(
     leftLowerLegVertsCenteredOnOrigin, 
-    yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, 
-    yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1,
+    yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1,
+    yHeightValueAtKneeWithSMPLX_BodyNormalizedTo1, 
     axis='y')
   #  TODO Scale vertices between Ankle and Calf :
   # Scale vertices between Ankle and Calf :
@@ -1214,6 +1213,8 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
     #4.75,    # KneeZ
     NXBsRealKneeZDepthInches,   # TODO:  write in calf and thigh indices and real measurements in inches
     TimsRealAnkleZDepthInches)  #3.5 # FIXME:     there's a lot of crap in here that should be changed.     -nxb on August 28, 2020      at 1:15 P.M. EDT
+  pPrintVarNXB("TimsRealAnkleZDepthInches", TimsRealAnkleZDepthInches, nNewlines=0)
+  pPrintVarNXB("yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1", yHeightValueAtAnkleWithSMPLX_BodyNormalizedTo1, nNewlines=0)
 
   #========================================================================
   # TODO:  write in calf and thigh indices and real measurements in inches
@@ -1232,13 +1233,13 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
     'Y' : customerEstimatedLowerLegLenInches        / yHeightBeforeAnyScaling_atTheBeginningOfThisFunction,
     'Z' : customerEstimatedMaxLowerLegDepthInches_Z / zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
     # Ankle:
-    'xWidthAtAnkle':   customersAnkleXWidthInches()   / xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction,
+    'xWidthAtAnkle':   customersAnkleXWidthInches()   / xWidthBeforeAnyScaling_atTheBeginningOfThisFunction,
     'yHeightAtAnkle':  customerEstimatedLowerLegLenInches/ yHeightBeforeAnyScaling_atTheBeginningOfThisFunction, # NOTE: scaled the same amount at the bottom of the leg as up at the knee
-    'zDepthAtAnkle':   customersAnkleZDepthInches()   / zDepthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction,
+    'zDepthAtAnkle':   customersAnkleZDepthInches()   / zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
     # Knee:
-    'xWidthAtKnee':   customersKneeXWidthInches()   / xWidthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction,
+    'xWidthAtKnee':   customersKneeXWidthInches()   /  xWidthBeforeAnyScaling_atTheBeginningOfThisFunction,
     'yHeightAtKnee':  customerEstimatedLowerLegLenInches/ yHeightBeforeAnyScaling_atTheBeginningOfThisFunction, # NOTE: scaled the same amount at the knee as down at the ankle
-    'zDepthAtKnee':   customersKneeZDepthInches()   / zDepthKnee_BeforeAnyScaling_atTheBeginningOfThisFunction,
+    'zDepthAtKnee':   customersKneeZDepthInches()   /  zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
     # TODO: proper "ankle-foot-boundary" resizing
     #'X_AtBot_Ankle': customersAnkleXWidthInches()   / xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction, # TODO: proper "ankle-foot-boundary" resizing
     # TODO: proper "ankle-foot-boundary" resizing

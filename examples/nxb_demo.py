@@ -36,6 +36,7 @@ import smplx
 import datetime # added by nxb, August 13, 2020
 from copy import deepcopy # Aug 14, 2020
 import sys
+from collections import OrderedDict as OrD
 
 debug=False
 show=True
@@ -894,6 +895,35 @@ def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
 
 
 
+#==================================================
+def setDifference(minuendNP_arr, arrsFullOfSubtrahends):
+  # there's definitely a shorter way to do this, but I turned off my internet so I could get a bit more done.
+  #   That's why I'm writing this shit by hand in a dumb way like this.
+  #   Obviously my python should be less "noobish," but whatever
+  #     -nxb, at 10:33 P.M. on Dec. 15, 2020
+
+  # runTime is O(N), where N is the length of "minuendNP_arr"
+
+  differenceDict=OrD()
+  # put all the elements into the dictionary:
+  for e in minuendNP_arr:
+  # A "minuend" is like this in subtraction:      minuend - subtrahend = difference     (ie. in 4 - 3 = 1, 4 is the minuend.  3 is the subtrahend, and 1 is the difference)
+    differenceDict[e] = True
+
+  # "Subtract" all the "subtrahend" elements:     (technically, we're doing set-difference, not actual subtraction, but you get the point)
+  #   (ie. take a set difference; we're just removing all the elements that are found in the variable "arrsYouWantToSubtractFromTheWhole")
+  for arrOfSubtrahends in arrsFullOfSubtrahends:  # A "subtrahend" is like this in subtraction:      minuend - subtrahend = difference     (ie. in 4 - 3 = 1, 3 is the subtrahend.  4 is the minuend, and 1 is the difference)
+    for subtrahend in arrOfSubtrahends:
+      differenceDict.pop(subtrahend)
+
+  # Build diff nparr:
+  differenceNP_Arr=np.zeros((len(differenceDict),)).astype("int64")
+  i=0
+  for e,booleanTrue in differenceDict.items():
+    differenceNP_Arr[i]=e
+    i+=1
+  return differenceNP_Arr
+#========================def setDifference(minuendNP_arr, arrsYouWantToSubtractFromTheWhole):==========================
 
 
 
@@ -938,9 +968,82 @@ def bottomOfLeftLowerLegIdx(modelType='SMPLX', ):
 
 
 #====================================================================================================
-def resizedLeftSMPLX_foot(vertices, xAnkleScaling, yAnkleScaling, zAnkleScaling):  # TODO: confirm this is correct (test)
+def resizedBodyBesidesSMPLX_leftLeg(vertices, xKneeScaling, yKneeScaling, zKneeScaling, restOfBodyIdxes):
+  '''
+    Resizes (scales) the rest of the body in a simple way
+
+    DOESN'T translate the rest of the body.
+
+    This method is so short because it uses the knee scaling factors from "resizedLeftSMPLX_AnkleToKnee"
+
+    @author nxb
+    @since Dec. 15, 2020
+
+    @param vertices
+    @param joints
+  '''
+  restOfBodyVerts = deepcopy(vertices[restOfBodyIdxes, : ] )
+  # Scale:
+  X,Y,Z=0,1,2
+  restOfBodyVerts[:,X] *= xKneeScaling
+  restOfBodyVerts[:,Y] *= yKneeScaling
+  restOfBodyVerts[:,Z] *= zKneeScaling
+  return restOfBodyVerts, restOfBodyIdxes
+#========= end function def of   "resizedBodyBesidesSMPLX_leftLeg(vertices, xAnkleScaling, yAnkleScaling, zAnkleScaling, restOfBodyIdxes):"==========
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#====================================================================================================
+def resizedLeftSMPLX_foot(vertices, xAnkleScaling, yAnkleScaling, zAnkleScaling):
   '''
     Resizes (scales) the foot in a simple way
+
+    DOESN'T translate the foot.
 
     This method is so short because it uses the ankle scaling factors from "resizedLeftSMPLX_AnkleToKnee"
 
@@ -1240,9 +1343,6 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
     'xWidthAtKnee':   customersKneeXWidthInches()   /  xWidthBeforeAnyScaling_atTheBeginningOfThisFunction,
     'yHeightAtKnee':  customerEstimatedLowerLegLenInches/ yHeightBeforeAnyScaling_atTheBeginningOfThisFunction, # NOTE: scaled the same amount at the knee as down at the ankle
     'zDepthAtKnee':   customersKneeZDepthInches()   /  zDepthBeforeAnyScaling_atTheBeginningOfThisFunction,
-    # TODO: proper "ankle-foot-boundary" resizing
-    #'X_AtBot_Ankle': customersAnkleXWidthInches()   / xWidthAnkle_BeforeAnyScaling_atTheBeginningOfThisFunction, # TODO: proper "ankle-foot-boundary" resizing
-    # TODO: proper "ankle-foot-boundary" resizing
   }
 
   return finalResizedLeftLowerLegVertsTranslatedBack, leftLowerLegIdxes, leftLowerLegXYZScaleParams # TODO: either    A) fill out this "params" or       B) don't return another value.       SOMEHOW "resizedLeftSMPLX_AnkleToKnee(... , ... ,)" needs to know what the other function did to resize the leg      -August 18, 2020
@@ -1336,8 +1436,6 @@ def leftUpperLegIndices(vs):
   upperLegsVertsIdxs     = np.intersect1d(  aboveKneeIdxs,   belowButtIdxs) 
   leftUpperLegsVertsIdxs = np.intersect1d(  upperLegsVertsIdxs, leftSideOfBodyIdxs) 
   return leftUpperLegsVertsIdxs
-  #leftUpperLeg           = vs[leftUpperLegsVertsIdxs, :]
-  #return leftUpperLeg
 #==================================================
 
 
@@ -1501,6 +1599,12 @@ def main(model_folder, model_type='smplx', ext='npz',
     # Scale the left foot to fit the lowerLeftLeg:
     resizedLeftFootVerts, leftFootIdxes = resizedLeftSMPLX_foot(vertices, leftLowerLegScaleParams['xWidthAtAnkle'],  leftLowerLegScaleParams['yHeightAtAnkle'],  leftLowerLegScaleParams['zDepthAtAnkle'])
 
+    # Scale the rest of the body to fit the lowerLeftLeg:
+    allIndices = np.arange(vertices.shape[0])
+    indicesWeWantToExclude = [leftFootIdxes, leftLowerLegIdxes]
+    restOfBodyIdxes = setDifference(allIndices, indicesWeWantToExclude)
+    resizedRestOfBodyVerts, restOfBodyIdxes = resizedBodyBesidesSMPLX_leftLeg(vertices, leftLowerLegScaleParams['xWidthAtKnee'], leftLowerLegScaleParams['yHeightAtKnee'], leftLowerLegScaleParams['zDepthAtKnee'], restOfBodyIdxes)
+
     #==================================================================================================================
     # Get 2 ankle verts for translation :
     #   (1 right below ankle, the other 1 right above the ankle)  so we can re-translate :
@@ -1523,76 +1627,15 @@ def main(model_folder, model_type='smplx', ext='npz',
     # This variable "yHeightTopOfLeftFoot" is the same as "yHeightOfLeftAnkle"
     yHeightTopOfLeftFoot      = np.max  ( vertices[idxsLeftFoot,Y])
     idxOfTopOfLeftFoot        = np.where( np.equal( vertices[:,Y], yHeightTopOfLeftFoot  ) )   [0]
-    vertLeftSideTopOfLeftFoot = vertices[ idxOfTopOfLeftFoot]
+    vertLeftSideTopOfLeftFoot = vertices[ idxOfTopOfLeftFoot  ]
     #==================================================================================================================
-
-
-
-
-    '''
-    # temporary debugging:
-    pPrintVarNXB("idxOfBottomOfLeftLowerLeg", idxOfBottomOfLeftLowerLeg, nNewlines=1) # [5884]
-    pPrintVarNXB("idxOfTopOfLeftFoot", idxOfTopOfLeftFoot, nNewlines=2)               # [5885]
-    tmpDebuggingVerts = deepcopy(vertices)
-    tmpDebuggingVerts[ idxOfBottomOfLeftLowerLeg , X ] +=   0.5
-    tmpDebuggingVerts[ idxOfTopOfLeftFoot        , X ] -=   0.5
-
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    # Basically a series of lines that functions equivalently to "pltshow(mesh)"
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    import pyrender
-    import trimesh
-    import trimesh.exchange.obj #  Added by nxb on   August 13, 2020
-    vertex_colors = np.ones([tmpDebuggingVerts.shape[0], 4]) * [0.3, 0.3, 0.3, 0.8] # gray
-    resizedTrimesh =  trimesh.Trimesh(tmpDebuggingVerts, model.faces,
-                               vertex_colors=vertex_colors) # nxb, Aug 13, 2020
-    mesh = pyrender.Mesh.from_trimesh(resizedTrimesh)
-
-    scene = pyrender.Scene()
-    scene.add(mesh)
-
-    if plot_joints:
-        sm = trimesh.creation.uv_sphere(radius=0.005)
-        sm.visual.vertex_colors = [0.9, 0.1, 0.1, 1.0]
-        tfs = np.tile(np.eye(4), (len(joints), 1, 1))
-        tfs[:, :3, 3] = joints
-        joints_pcl = pyrender.Mesh.from_trimesh(sm, poses=tfs)
-        scene.add(joints_pcl)
-
-    pyrender.Viewer(scene, use_raymond_lighting=True)  # NOTE: this line turns on/off the mesh popping up visually AKA "pltshow"  -nxb; August 28, at 11:52 A.M.
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    # end 
-    #   "Basically a series of lines that functions equivalently to "pltshow(mesh)"
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    #============================================================================
-    '''
-
-
-
-
-
     # above - below => positiveY_Value
     origDisplacementLeftAnkle = vertLeftSideBottomOfLowerLeg - vertLeftSideTopOfLeftFoot
     print("\n"*3 +    "="*99)
     print("origDisplacementLeftAnkle: {}".format(origDisplacementLeftAnkle))
     #==================================================================================================================
-    # end "Get 2 knee verts for translation"
-    #   (1 right below knee, the other 1 right above the knee)  so we can re-translate :
+    # end "Get 2 ankle verts for translation"
+    #   (1 right below ankle, the other 1 right above the ankle)  so we can re-translate :
     #==================================================================================================================
 
     # Scale "origDiff" in x, y, and z   to find the amount of "translationDelta" where the upperLeg SHOULD BE relative to the lowerLeg:
@@ -1600,12 +1643,9 @@ def main(model_folder, model_type='smplx', ext='npz',
 
     # Scale x:
     scaledDisplacementLeftAnkle  = deepcopy(origDisplacementLeftAnkle)
-    print("\n"*3 +    "="*99)
-    print("scaledDisplacementLeftAnkle: {}".format(scaledDisplacementLeftAnkle))
     scaledDisplacementLeftAnkle[:,X]*= leftLowerLegScaleParams['xWidthAtAnkle']
     scaledDisplacementLeftAnkle[:,Y]*= leftLowerLegScaleParams['yHeightAtAnkle']
     scaledDisplacementLeftAnkle[:,Z]*= leftLowerLegScaleParams['zDepthAtAnkle']
-    print("scaledDisplacementLeftAnkle, (post-'scaling'): {}".format(scaledDisplacementLeftAnkle))
 
     #================================================================================
     # Translate foot under leftLowerLeg :
@@ -1613,23 +1653,15 @@ def main(model_folder, model_type='smplx', ext='npz',
     #   1.  Get the index of bottomOfLeftLowerLeg within the indexing of "resizedLeftFootVerts"   then 
     #   2.  Get the index of topOfLeftFoot within the indexing of "resizedLeftFootVerts"   then 
     #   3.  bottomOfLeftLowerLeg - topOfLeftFoot
-    idxOfBottomOfLeftLowerLegInResizedLeftLowerLegVerts = np.where(leftLowerLegIdxes == idxOfBottomOfLeftLowerLeg)[0] # 5884    =>  190
-    currBottomOfResizedLeftLowerLeg = resizedLeftLowerLegVerts[ idxOfBottomOfLeftLowerLegInResizedLeftLowerLegVerts] # 5884   =>  190
+    idxOfBottomOfLeftLowerLegInResizedLeftLowerLegVerts = np.where(leftLowerLegIdxes == idxOfBottomOfLeftLowerLeg)[0] # ie. 5884  =>  190
+    currBottomOfResizedLeftLowerLeg = resizedLeftLowerLegVerts[ idxOfBottomOfLeftLowerLegInResizedLeftLowerLegVerts]  # ie. 5884  =>  190
 
-    idxOfTopOfLeftFootInResizedLeftFootVerts = np.where(leftFootIdxes == idxOfTopOfLeftFoot)[0]#5885  =>  111
-    currTopOfResizedLeftFoot = resizedLeftFootVerts [ idxOfTopOfLeftFootInResizedLeftFootVerts]#5885  =>  111
+    idxOfTopOfLeftFootInResizedLeftFootVerts = np.where(leftFootIdxes == idxOfTopOfLeftFoot)[0]# ie. 5885  =>  111
+    currTopOfResizedLeftFoot = resizedLeftFootVerts [ idxOfTopOfLeftFootInResizedLeftFootVerts]# ie. 5885  =>  111
     currAnkleDisplacement = currBottomOfResizedLeftLowerLeg - currTopOfResizedLeftFoot
 
-    pPrintVarNXB("idxOfBottomOfLeftLowerLegInResizedLeftLowerLegVerts", idxOfBottomOfLeftLowerLegInResizedLeftLowerLegVerts, nNewlines=0)
-    pPrintVarNXB("currBottomOfResizedLeftLowerLeg", currBottomOfResizedLeftLowerLeg, nNewlines=0)
-    pPrintVarNXB("idxOfTopOfLeftFootInResizedLeftFootVerts", idxOfTopOfLeftFootInResizedLeftFootVerts, nNewlines=0)
-    pPrintVarNXB("currTopOfResizedLeftFoot", currTopOfResizedLeftFoot, nNewlines=0)
     # Move the leg to be above the foot:
     resizedLeftLowerLegVerts = resizedLeftLowerLegVerts - currBottomOfResizedLeftLowerLeg + currTopOfResizedLeftFoot + scaledDisplacementLeftAnkle
-
-    # whatDisplacementIsCurrently =
-    # whatDisplacementShouldBe =  Orig
-    #resizedLeftFootVerts[] -
 
 
     #==================================================================================================================
@@ -1679,9 +1711,31 @@ def main(model_folder, model_type='smplx', ext='npz',
     scaledDisplacementLeftKnee[:,Z]*= leftLowerLegScaleParams['zDepthAtKnee']
     print("scaledDisplacementLeftKnee, (post-'scaling'): {}".format(scaledDisplacementLeftKnee))
 
+    #================================================================================
+    # Translate leftLowerLeg AND leftFoot under "resizedRestOfBodyVerts" :
+    #   First we need the correspondences between the indexing of "vertices" and the indexing of "resizedLeftLowerLegVerts"
+    #   1.  Get the index of bottomOfLeftLowerLeg within the indexing of "resizedLeftLowerLegVerts"   then 
+    #   2.  Get the index of topOfLeftFoot within the indexing of "resizedLeftLowerLegVerts"   then 
+    #   3.  bottomOfRestOfBody - topOfLeftLowerLeg
+    idxOfBottomOfResizedRestOfBodyOnLeftSide = np.where(restOfBodyIdxes == idxOfBottomOfLeftUpperLeg)[0] # ie. 5884  =>  190
+    currBottomOfResizedRestOfBodyOnLeftSide  = resizedRestOfBodyVerts[ idxOfBottomOfResizedRestOfBodyOnLeftSide]# ie. 5884  =>  190
+
+    idxOfTopOfLeftLowerLegInResizedLeftLowerLegVerts = np.where(leftLowerLegIdxes == idxOfTopOfLeftLowerLeg)[0]#ie. 5885  =>  111
+    currTopOfResizedLeftLowerLeg  = resizedLeftLowerLegVerts [ idxOfTopOfLeftLowerLegInResizedLeftLowerLegVerts]#ie. 5885  =>  111
+    currKneeDisplacement = currBottomOfResizedRestOfBodyOnLeftSide - currTopOfResizedLeftLowerLeg
+
+    pPrintVarNXB("idxOfBottomOfResizedRestOfBodyOnLeftSide", idxOfBottomOfResizedRestOfBodyOnLeftSide, nNewlines=0)
+    pPrintVarNXB("idxOfTopOfLeftLowerLegInResizedLeftLowerLegVerts", idxOfTopOfLeftLowerLegInResizedLeftLowerLegVerts, nNewlines=0)
+    pPrintVarNXB("currKneeDisplacement", currKneeDisplacement, nNewlines=0)
+
+    # Move the leg to be above the foot:
+    resizedRestOfBodyVerts = resizedRestOfBodyVerts - currBottomOfResizedRestOfBodyOnLeftSide + currTopOfResizedLeftLowerLeg + scaledDisplacementLeftKnee
+
     vertsWithResizedLeftLeg = deepcopy(vertices)
     vertsWithResizedLeftLeg[idxsLeftLowerLeg] = resizedLeftLowerLegVerts
     vertsWithResizedLeftLeg[idxsLeftFoot] = resizedLeftFootVerts
+    vertsWithResizedLeftLeg[restOfBodyIdxes] = resizedRestOfBodyVerts
+
 
     #================================================================================
     # TODO:     leftUpperLegParams  for merging UpperLegs with lowerLegs        (in "`getResizedLeftSMPLX_UpperLeg(... , ... , ... )`")

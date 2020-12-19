@@ -1199,7 +1199,7 @@ def resizedLeftSMPLX_AnkleToKnee(vertices, joints, customerEstimatedLowerLegLenI
   #     NOTE: maintains proportions of lowerLeg;   **doesn't lose information**    -nxb; August 14, 2020
   #====================================================================================
   xWidthBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,X].max() - leftLowerLegVertsCenteredOnOrigin[:,X].min()
-  yHeightBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
+  yHeightBeforeAnyScaling_atTheBeginningOfThisFunction= leftLowerLegVertsCenteredOnOrigin[:,Y].max() - leftLowerLegVertsCenteredOnOrigin[:,Y].min()
   zDepthBeforeAnyScaling_atTheBeginningOfThisFunction = leftLowerLegVertsCenteredOnOrigin[:,Z].max() - leftLowerLegVertsCenteredOnOrigin[:,Z].min()
 
 
@@ -1494,7 +1494,7 @@ def main(model_folder, model_type='smplx', ext='npz',
     model = smplx.create(model_folder, model_type=model_type,
                          gender=gender, use_face_contour=use_face_contour,
                          ext=ext)
-    # nxb added the following lines (Aug 18, 2020)
+    # NXB added the following lines (Aug 18, 2020)
     X,Y,Z=0,1,2
 
     #output_dir_fname='/home/nathan_bendich/Documents/code/gitCloned/smplx/examples/out_meshes/'  # in DropBox now.     -nxb;   August 14, 2020.
@@ -1511,11 +1511,8 @@ def main(model_folder, model_type='smplx', ext='npz',
     vertices = output.vertices.detach().cpu().numpy().squeeze()
     joints = output.joints.detach().cpu().numpy().squeeze()
 
-
-
     #==============================================================================================
     #==============================================================================================
-
     #  TIM_ESTIMATED_LOWER_LEG_LENGTH_INCHES = ...
     #===============================================
     # NOTE: 
@@ -1548,7 +1545,7 @@ def main(model_folder, model_type='smplx', ext='npz',
     '''
     # end NOTE:
     TIM_PIXEL_HEIGHT_INCHES = 5.6875
-    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES = 1.375
+    TIM_LEFT_LOWER_LEG_PIXEL_LEN_INCHES = 1.375 # this is from an image of Tim Schrader
     TIM_SELF_REPORTED_HEIGHT_INCHES = 74     #   Tim's probably exaggerating how tall he is.
     # "Tim's probably shorter than he says he is" comment continued:    "but I guess I'll cut him some slack for a fucking sec.  Of course, when it comes to literally getting him ideal jeans, we should use camera parameters to estimate his body measurements better."   -nxb, August 14, 2020   
     TIM_LOWER_LEG_LENGTH_INCHES_____ESTIMATED_AND_CALCULATED_BY_NATHAN = \
